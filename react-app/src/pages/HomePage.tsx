@@ -1,0 +1,606 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { DESTINATIONS } from "../data/destinations";
+import { SearchBar } from "../components/SearchBar";
+import "./HomePage.css";
+
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+export function HomePage() {
+  const [totalSecs, setTotalSecs] = useState(18 * 3600 + 42 * 60 + 7);
+  const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTotalSecs((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+
+  const toggleWish = (key: string) =>
+    setWishlist((w) => ({ ...w, [key]: !w[key] }));
+
+  const [featured, ...rest] = DESTINATIONS;
+  const deals = DESTINATIONS;
+
+  return (
+    <>
+      {/* HERO */}
+      <section id="hero">
+        <div className="hero-bg">
+          <img
+            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80"
+            alt="Luxury mountain landscape"
+          />
+        </div>
+        <div className="hero-overlay"></div>
+        <div className="hero-content">
+          <div className="hero-badge">
+            <div className="hero-dot"></div>
+            <span>New: 4 curated journeys for 2025</span>
+          </div>
+          <h1 className="hero-headline">
+            The World's Most
+            <br />
+            <em>Extraordinary</em>
+            <br />
+            Journeys Await
+          </h1>
+          <p className="hero-sub">
+            Bespoke luxury travel, crafted around you. Singapore &amp; Bali, Dubai,
+            Bali long-stay, and sacred journeys to Makkah &amp; Madinah — all fully
+            costed.
+          </p>
+          <div className="hero-btns">
+            <a href="#destinations" className="btn btn-gold">
+              Explore destinations ↗
+            </a>
+            <a href="#deals" className="btn btn-outline-white">
+              View current deals
+            </a>
+          </div>
+          <SearchBar variant="hero" />
+        </div>
+        <div className="hero-stats">
+          <div className="hero-stat">
+            <strong>15+</strong>
+            <small>Years of expertise</small>
+          </div>
+          <div className="hero-stat">
+            <strong>4.9★</strong>
+            <small>Trustpilot rating</small>
+          </div>
+          <div className="hero-stat">
+            <strong>12,000+</strong>
+            <small>Holidays crafted</small>
+          </div>
+        </div>
+      </section>
+
+      {/* DESTINATIONS */}
+      <section id="destinations">
+        <div className="destinations-inner">
+          <div className="destinations-header">
+            <div>
+              <h2 className="section-title">Curated Destinations</h2>
+              <p className="section-sub">
+                Four hand-selected journeys, each fully costed and ready to book.
+              </p>
+            </div>
+            <Link to="/destinations" className="btn-text-gold">
+              View all destinations →
+            </Link>
+          </div>
+          <div className="dest-grid">
+            {featured && (
+              <Link
+                to={`/destinations/${featured.slug}`}
+                className="dest-card featured reveal"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <div className="dest-img">
+                  <img src={featured.image} alt={featured.name} />
+                  <div className="dest-overlay"></div>
+                  <div className="dest-img-meta">
+                    <div className="dest-region">{featured.regionLabel}</div>
+                    <div className="dest-name">{featured.name}</div>
+                  </div>
+                  {featured.badge && (
+                    <div className="dest-badge">
+                      <span>{featured.badge}</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={`Wishlist ${featured.name}`}
+                    className={`dest-wish ${wishlist[featured.slug] ? "active" : ""}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleWish(featured.slug);
+                    }}
+                  >
+                    {wishlist[featured.slug] ? "♥" : "♡"}
+                  </button>
+                </div>
+                <div className="dest-body">
+                  <p className="dest-desc">{featured.description}</p>
+                  <div className="dest-footer">
+                    <div className="dest-price">
+                      <small>From per person</small>
+                      <strong>{featured.fromPrice}</strong>
+                    </div>
+                    <div className="dest-tags">
+                      {featured.tags.map((t) => (
+                        <span className="tag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {rest.map((d, i) => (
+              <Link
+                key={d.slug}
+                to={`/destinations/${d.slug}`}
+                className={`dest-card reveal reveal-delay-${i + 1}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <div className="dest-img">
+                  <img src={d.image} alt={d.name} />
+                  <div className="dest-overlay"></div>
+                  <div className="dest-img-meta">
+                    <div className="dest-region">{d.regionLabel}</div>
+                    <div className="dest-name">{d.name}</div>
+                  </div>
+                  {d.badge && (
+                    <div className="dest-badge">
+                      <span>{d.badge}</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={`Wishlist ${d.name}`}
+                    className={`dest-wish ${wishlist[d.slug] ? "active" : ""}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleWish(d.slug);
+                    }}
+                  >
+                    {wishlist[d.slug] ? "♥" : "♡"}
+                  </button>
+                </div>
+                <div className="dest-body">
+                  <p className="dest-desc">{d.description}</p>
+                  <div className="dest-footer">
+                    <div className="dest-price">
+                      <small>From per person</small>
+                      <strong>{d.fromPrice}</strong>
+                    </div>
+                    <div className="dest-tags">
+                      {d.tags.slice(0, 2).map((t) => (
+                        <span className="tag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DEALS */}
+      <section id="deals">
+        <div className="deals-inner">
+          <div className="deals-header">
+            <div>
+              <h2 className="section-title">Exceptional Deals</h2>
+              <p className="section-sub" style={{ color: "rgba(255,255,255,.45)" }}>
+                Live published prices on our four signature journeys.
+              </p>
+            </div>
+            <div className="countdown-bar">
+              <span className="label">Deals expire in</span>
+              <div className="countdown-timer">
+                <div className="time-block">
+                  <strong>{pad(h)}</strong>
+                  <small>hrs</small>
+                </div>
+                <span className="time-sep">:</span>
+                <div className="time-block">
+                  <strong>{pad(m)}</strong>
+                  <small>min</small>
+                </div>
+                <span className="time-sep">:</span>
+                <div className="time-block">
+                  <strong>{pad(s)}</strong>
+                  <small>sec</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="deals-grid">
+            {deals.slice(0, 3).map((d, i) => (
+              <Link
+                key={d.slug}
+                to={`/destinations/${d.slug}`}
+                className={`deal-card reveal reveal-delay-${i}`}
+                style={{ textDecoration: "none" }}
+              >
+                <div className="deal-img">
+                  <img src={d.image} alt={d.name} />
+                  <div className="deal-img-overlay"></div>
+                  <div className="deal-save-tag">From {d.fromPrice}</div>
+                  <div className="deal-type-tag">{d.tags[0]}</div>
+                </div>
+                <div className="deal-body">
+                  <div className="deal-dest">{d.regionLabel}</div>
+                  <div className="deal-title">{d.name}</div>
+                  <div className="deal-includes">
+                    {d.tags.slice(0, 3).map((t) => (
+                      <span key={t} className="deal-include">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="deal-pricing">
+                    <div className="deal-price-wrap">
+                      <div>
+                        <span className="deal-now">{d.fromPrice}</span>
+                        <span className="deal-per"> pp</span>
+                      </div>
+                    </div>
+                    <span className="deal-cta">View package →</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* WHY */}
+      <section id="why">
+        <div className="why-inner">
+          <div className="why-grid">
+            <div className="why-img reveal">
+              <div className="why-img-main">
+                <img
+                  src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=600&q=80"
+                  alt="Luxury hotel pool"
+                />
+              </div>
+              <div className="why-img-accent">
+                <img
+                  src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=300&q=80"
+                  alt="Tropical beach"
+                />
+              </div>
+              <div className="why-badge">
+                <strong>15+</strong>
+                <span>Years crafting journeys</span>
+              </div>
+            </div>
+            <div className="reveal reveal-delay-2">
+              <h2 className="section-title">
+                Travel Shouldn't
+                <br />
+                Be Left to Chance
+              </h2>
+              <p className="section-sub">
+                Every journey is researched, refined, and personalised by our destination
+                specialists — people who've actually been there.
+              </p>
+              <div className="why-features">
+                <div className="why-feature">
+                  <div className="why-icon">✈</div>
+                  <div className="why-feature-text">
+                    <h4>Tailor-made only</h4>
+                    <p>
+                      Every itinerary is built around you — your pace, preferences, and
+                      passions.
+                    </p>
+                  </div>
+                </div>
+                <div className="why-feature">
+                  <div className="why-icon">🌍</div>
+                  <div className="why-feature-text">
+                    <h4>Expert specialists</h4>
+                    <p>
+                      Each destination expert has lived in or visited the places they
+                      recommend.
+                    </p>
+                  </div>
+                </div>
+                <div className="why-feature">
+                  <div className="why-icon">☎</div>
+                  <div className="why-feature-text">
+                    <h4>24/7 on-trip support</h4>
+                    <p>A real human on the line, any hour.</p>
+                  </div>
+                </div>
+                <div className="why-feature">
+                  <div className="why-icon">🛡</div>
+                  <div className="why-feature-text">
+                    <h4>Fully protected</h4>
+                    <p>Every penny is fully financially protected. Always.</p>
+                  </div>
+                </div>
+                <div className="why-feature">
+                  <div className="why-icon">🌿</div>
+                  <div className="why-feature-text">
+                    <h4>Responsible travel</h4>
+                    <p>
+                      We offset carbon on every booking and partner with conservation-led
+                      lodges.
+                    </p>
+                  </div>
+                </div>
+                <div className="why-feature">
+                  <div className="why-icon">💰</div>
+                  <div className="why-feature-text">
+                    <h4>Price match pledge</h4>
+                    <p>Find the same trip for less and we'll match it.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section id="testimonials">
+        <div className="testimonials-inner">
+          <div className="testimonials-header">
+            <h2 className="section-title" style={{ textAlign: "center" }}>
+              Heard from Our Travellers
+            </h2>
+          </div>
+          <div className="testi-grid">
+            <div className="testi-card reveal">
+              <div className="testi-quote-mark">&ldquo;</div>
+              <div className="testi-stars">★★★★★</div>
+              <p className="testi-text">
+                "Farland turned a daydream into an itinerary — Singapore and Bali back to
+                back was the easiest two weeks of our lives."
+              </p>
+              <div className="testi-dest-tag">
+                <span>✈ Singapore &amp; Bali</span>
+              </div>
+              <div className="testi-author">
+                <img
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=70"
+                  alt="Sarah M"
+                  className="testi-avatar"
+                />
+                <div className="testi-author-info">
+                  <h5>Sarah Mitchell</h5>
+                  <small>11-night escape · Perth</small>
+                </div>
+              </div>
+              <div className="testi-platform">Trustpilot</div>
+            </div>
+
+            <div className="testi-card highlight reveal reveal-delay-1">
+              <div className="testi-quote-mark">&ldquo;</div>
+              <div className="testi-stars">★★★★★</div>
+              <p className="testi-text">
+                "The Bali long-stay was perfect — four very different resorts in twenty
+                nights. Every transfer was waiting. Every detail was thought through."
+              </p>
+              <div className="testi-dest-tag">
+                <span>✈ Bali Long Stay</span>
+              </div>
+              <div className="testi-author">
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=70"
+                  alt="James P"
+                  className="testi-avatar"
+                />
+                <div className="testi-author-info">
+                  <h5>James Pemberton</h5>
+                  <small>20-night Bali · Perth</small>
+                </div>
+              </div>
+              <div className="testi-platform">Google</div>
+            </div>
+
+            <div className="testi-card reveal reveal-delay-2">
+              <div className="testi-quote-mark">&ldquo;</div>
+              <div className="testi-stars">★★★★★</div>
+              <p className="testi-text">
+                "Our Umrah was handled with the care it deserved. Hotels minutes from the
+                Haram, transfers all arranged. We will only travel with Farland from now
+                on."
+              </p>
+              <div className="testi-dest-tag">
+                <span>✈ Makkah &amp; Madinah</span>
+              </div>
+              <div className="testi-author">
+                <img
+                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=70"
+                  alt="Priya K"
+                  className="testi-avatar"
+                />
+                <div className="testi-author-info">
+                  <h5>Yasmin Khan</h5>
+                  <small>10-night Umrah · Manchester</small>
+                </div>
+              </div>
+              <div className="testi-platform">Trustpilot</div>
+            </div>
+          </div>
+          <div className="trustpilot-bar reveal">
+            <div className="trust-item">
+              <strong>4.9 / 5</strong>
+              <span>Trustpilot rating</span>
+            </div>
+            <div className="trust-divider"></div>
+            <div className="trust-item">
+              <strong>12,400+</strong>
+              <span>Holidays crafted</span>
+            </div>
+            <div className="trust-divider"></div>
+            <div className="trust-item">
+              <strong>98%</strong>
+              <span>Would recommend us</span>
+            </div>
+            <div className="trust-divider"></div>
+            <div className="trust-item">
+              <strong>Fully protected</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA BANNER */}
+      <section id="cta-banner">
+        <div className="cta-bg">
+          <div className="cta-bg-img">
+            <img
+              src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1600&q=80"
+              alt="Luxury travel destination"
+            />
+          </div>
+          <div className="cta-overlay"></div>
+          <div className="cta-content">
+            <h2 className="section-title" style={{ fontSize: "clamp(34px,5vw,62px)" }}>
+              Plan Your Dream
+              <br />
+              Holiday Today
+            </h2>
+            <p className="section-sub">
+              Speak with one of our travel specialists. No obligation — just honest,
+              expert advice and a plan built entirely around you.
+            </p>
+            <div className="cta-features">
+              <span className="cta-feature">No booking fees</span>
+              <span className="cta-feature">Price match guarantee</span>
+              <span className="cta-feature">Expert consultation included</span>
+              <span className="cta-feature">Fullyprotected</span>
+            </div>
+            <div className="cta-btns">
+              <Link to="/contact#inquiry-section" className="btn btn-gold">
+                Start planning your trip ↗
+              </Link>
+              <a href="tel:+44800123456" className="btn btn-outline-white">
+                ☎ Call +44 800 123 456
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <section id="newsletter">
+        <div className="newsletter-inner">
+          <div className="reveal">
+            <h2 className="section-title">
+              Travel Inspiration,
+              <br />
+              Delivered to You
+            </h2>
+            <p className="section-sub">
+              Join 45,000+ discerning travellers who receive our curated destination
+              guides, early-access deals, and expert insights — never spam.
+            </p>
+            <div className="newsletter-perks">
+              <div className="perk">
+                <div className="perk-icon">🗺</div>
+                <div className="perk-text">
+                  <h5>Monthly destination guides</h5>
+                  <p>
+                    Deep-dive editorial guides to the world's most captivating places.
+                  </p>
+                </div>
+              </div>
+              <div className="perk">
+                <div className="perk-icon">⚡</div>
+                <div className="perk-text">
+                  <h5>Early access to flash deals</h5>
+                  <p>
+                    Subscribers get 48-hour early access to limited-time offers.
+                  </p>
+                </div>
+              </div>
+              <div className="perk">
+                <div className="perk-icon">✨</div>
+                <div className="perk-text">
+                  <h5>Exclusive member perks</h5>
+                  <p>Complimentary upgrades, early check-ins, and private experiences.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <form
+            className="newsletter-form reveal reveal-delay-2"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <div className="newsletter-form-title">Begin Your Journey</div>
+            <p className="newsletter-form-sub">
+              Tell us a little about your travel dreams and we'll tailor your experience
+              from day one.
+            </p>
+            <div className="form-row-2">
+              <div className="form-group">
+                <label htmlFor="nl-first">First name</label>
+                <input id="nl-first" type="text" placeholder="Your first name" />
+              </div>
+              <div className="form-group">
+                <label htmlFor="nl-last">Last name</label>
+                <input id="nl-last" type="text" placeholder="Your last name" />
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="nl-email">Email address</label>
+              <input id="nl-email" type="email" placeholder="your@email.com" />
+            </div>
+            <div className="form-group">
+              <label htmlFor="nl-dream">Which journey interests you?</label>
+              <select id="nl-dream" defaultValue="">
+                <option value="">Select a destination</option>
+                {DESTINATIONS.map((d) => (
+                  <option key={d.slug}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-consent">
+              <input type="checkbox" id="consent" />
+              <label htmlFor="consent">
+                <span>
+                  I'd love to receive Farland's travel inspiration and exclusive offers.
+                  I understand I can unsubscribe at any time.{" "}
+                  <a href="#privacy">Privacy policy</a>
+                </span>
+              </label>
+            </div>
+            <button
+              type="submit"
+              className="btn btn-gold"
+              style={{ width: "100%", justifyContent: "center", padding: 16 }}
+            >
+              Join 45,000+ travellers ↗
+            </button>
+            <p className="newsletter-note">
+              No spam. Unsubscribe any time. Your data is never sold.
+            </p>
+          </form>
+        </div>
+      </section>
+    </>
+  );
+}
