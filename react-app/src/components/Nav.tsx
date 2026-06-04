@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useScrollSolid } from "../hooks/useScrollSolid";
 import { DESTINATIONS } from "../data/destinations";
+import { UMRAH_CITIES, umrahStarsShort } from "../data/umrah";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? "active" : undefined;
 
-type DropdownKey = "destinations" | "deals" | null;
+type DropdownKey = "destinations" | "deals" | "umrah" | null;
 
 type FilterPill = {
   label: string;
@@ -285,11 +286,66 @@ export function Nav() {
     );
   };
 
+  const renderUmrahMega = () => (
+    <div
+      className={`mega-dropdown mega-umrah ${
+        openDropdown === "umrah" ? "open" : ""
+      }`}
+      onMouseEnter={cancelClose}
+      onMouseLeave={scheduleClose}
+      role="menu"
+      aria-hidden={openDropdown !== "umrah"}
+    >
+      <div className="mega-inner">
+        <div className="mega-eyebrow">
+          Umrah packages by departure city · September
+        </div>
+        <div className="mega-filter-row">
+          {UMRAH_CITIES.map((city) => (
+            <div className="mega-group" key={city.id}>
+              <div className="mega-group-label">{city.city}</div>
+              <div className="mega-pills">
+                {city.packages.map((pkg) => {
+                  const to = `/umrah#${city.id}`;
+                  return (
+                    <a
+                      key={pkg.id}
+                      href={to}
+                      className="mega-pill"
+                      onClick={(e) => handleNav(e, to)}
+                    >
+                      <span>
+                        {umrahStarsShort(pkg.stars)} · {pkg.nights} ·{" "}
+                        {pkg.priceDisplay}
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mega-footer">
+          <Link
+            to="/umrah"
+            className="mega-footer-link"
+            onClick={() => setOpenDropdown(null)}
+          >
+            View all Umrah packages →
+          </Link>
+          <span className="mega-footer-meta">
+            Steps from the Haram · Quad occupancy · September departures
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <nav id="site-nav" className={navClassName} ref={navRef}>
       <div className="nav-inner">
         <Link to="/" className="nav-logo" onClick={closeMenu}>
-          Farland<span> Holidays</span>
+          Farland<span> Travels</span>
         </Link>
         <ul className="nav-links" id="primary-nav">
           <li>
@@ -333,6 +389,17 @@ export function Nav() {
               <span className="nav-caret" aria-hidden="true">▾</span>
             </NavLink>
             {renderDealsMega()}
+          </li>
+          <li
+            className={`nav-mega-trigger ${openDropdown === "umrah" ? "active" : ""}`}
+            onMouseEnter={() => openMega("umrah")}
+            onMouseLeave={scheduleClose}
+          >
+            <NavLink to="/umrah" className={linkClass} onClick={closeMenu}>
+              Umrah
+              <span className="nav-caret" aria-hidden="true">▾</span>
+            </NavLink>
+            {renderUmrahMega()}
           </li>
           <li>
             <NavLink to="/about" className={linkClass} onClick={closeMenu}>

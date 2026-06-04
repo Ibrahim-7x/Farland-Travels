@@ -5,6 +5,7 @@ import { AboutPage } from "./pages/AboutPage";
 import { DestinationsPage } from "./pages/DestinationsPage";
 import { DestinationDetailPage } from "./pages/DestinationDetailPage";
 import { DealsPage } from "./pages/DealsPage";
+import { UmrahPage } from "./pages/UmrahPage";
 import { ContactPage } from "./pages/ContactPage";
 import { SearchResultsPage } from "./pages/SearchResultsPage";
 
@@ -21,6 +22,7 @@ function App() {
             element={<DestinationDetailPage />}
           />
           <Route path="/deals" element={<DealsPage />} />
+          <Route path="/umrah" element={<UmrahPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/search-results" element={<SearchResultsPage />} />
         </Route>

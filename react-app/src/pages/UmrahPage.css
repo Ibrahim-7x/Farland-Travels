@@ -1,0 +1,40 @@
+/* ─── UMRAH PAGE ───
+   Reuses the shared theme tokens and the card/grid conventions already
+   used by the Deals page — no new colours, spacing scale, or patterns. */
+
+.um-page-body{max-width:1340px;margin:0 auto;padding:48px clamp(20px,4vw,56px) 40px}
+
+/* ─── CITY SECTION ─── */
+.um-city{scroll-margin-top:120px;margin-bottom:48px}
+.um-city:last-child{margin-bottom:0}
+.um-city-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--ivory-mid)}
+.um-city-title{font-family:var(--font-display);font-size:clamp(24px,3vw,32px);font-weight:400;color:var(--navy);letter-spacing:-.01em;line-height:1.1}
+.um-city-meta{font-family:var(--font-body);font-size:12px;color:var(--stone-dark)}
+
+/* ─── PACKAGE GRID ─── */
+.um-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+@media(max-width:1200px){.um-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.um-grid{grid-template-columns:1fr}}
+
+/* ─── PACKAGE CARD ─── */
+.um-card{display:flex;flex-direction:column;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-md);border:1px solid transparent;padding:20px 20px 18px;transition:transform .4s var(--ease),box-shadow .4s var(--ease),border-color .4s var(--ease)}
+.um-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--gold)}
+
+.um-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.um-stars{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);border:1px solid rgba(13,110,253,.2);padding:5px 11px;border-radius:var(--r-pill)}
+.um-price{font-family:var(--font-display);font-size:26px;font-weight:400;color:var(--navy);line-height:1;text-align:right}
+.um-price small{display:block;font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--stone-dark)}
+
+.um-card-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.um-pill{font-family:var(--font-body);font-size:10px;color:var(--stone-dark);background:var(--ivory);padding:3px 9px;border-radius:var(--r-pill);border:1px solid var(--ivory-mid)}
+
+/* ─── HOTELS (Makkah & Madinah) ─── */
+.um-hotels{display:flex;flex-direction:column;gap:10px;flex:1;margin-bottom:16px}
+.um-hotel{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:2px solid var(--gold-pale)}
+.um-hotel-city{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.um-hotel-name{font-family:var(--font-body);font-size:13px;color:var(--navy);font-weight:500;line-height:1.35}
+.um-hotel-nights{font-family:var(--font-body);font-size:11px;color:var(--stone-dark)}
+
+/* ─── ACTIONS ─── */
+.um-card-actions{display:flex;border-top:1px solid var(--ivory-mid);padding-top:14px}
+.um-card-actions .btn-primary{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
