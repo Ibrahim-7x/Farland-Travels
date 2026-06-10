@@ -4,37 +4,137 @@
 
 .um-page-body{max-width:1340px;margin:0 auto;padding:48px clamp(20px,4vw,56px) 40px}
 
+/* ─── CITY TABS (segmented pill control) ─── */
+.um-tabs-wrap{display:flex;justify-content:center;margin-bottom:36px;scroll-margin-top:120px}
+.um-tabs{display:inline-flex;gap:4px;background:var(--white);border:1px solid var(--ivory-mid);border-radius:var(--r-pill);padding:5px;box-shadow:var(--shadow-sm)}
+.um-tab{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-body);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--stone-dark);background:transparent;border:none;padding:10px 22px;border-radius:var(--r-pill);cursor:pointer;transition:all .25s var(--ease);white-space:nowrap}
+.um-tab:hover{background:var(--gold-pale);color:var(--navy)}
+.um-tab.active{background:var(--gold);color:var(--white);box-shadow:var(--shadow-gold)}
+.um-tab.active:hover{background:var(--gold);color:var(--white)}
+.um-tab-count{font-size:10px;font-weight:700;line-height:1;color:var(--stone-dark);background:var(--ivory);padding:4px 8px;border-radius:var(--r-pill);transition:all .25s var(--ease)}
+.um-tab:hover .um-tab-count{color:var(--navy);background:rgba(13,110,253,.10)}
+.um-tab.active .um-tab-count{color:var(--navy);background:var(--white)}
+@media(max-width:640px){
+  .um-tabs-wrap{margin-bottom:26px}
+  .um-tabs{display:flex;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .um-tabs::-webkit-scrollbar{display:none}
+  .um-tab{flex:1 0 auto;padding:10px 14px}
+}
+
 /* ─── CITY SECTION ─── */
-.um-city{scroll-margin-top:120px;margin-bottom:48px}
-.um-city:last-child{margin-bottom:0}
+.um-city{scroll-margin-top:120px}
 .um-city-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--ivory-mid)}
 .um-city-title{font-family:var(--font-display);font-size:clamp(24px,3vw,32px);font-weight:400;color:var(--navy);letter-spacing:-.01em;line-height:1.1}
 .um-city-meta{font-family:var(--font-body);font-size:12px;color:var(--stone-dark)}
 
-/* ─── PACKAGE GRID ─── */
-.um-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+/* Fade/slide-in when the active tab's panel mounts */
+@media(prefers-reduced-motion:no-preference){
+  .um-tab-panel{animation:umPanelIn .4s var(--ease)}
+  .um-modal{animation:umModalIn .3s var(--ease)}
+}
+@keyframes umPanelIn{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes umModalIn{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ─── EMPTY STATE ─── */
+.um-empty{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:var(--white);border:1px dashed var(--ivory-mid);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:56px 24px}
+.um-empty-icon{font-size:34px;line-height:1}
+.um-empty p{font-family:var(--font-body);font-size:14px;color:var(--stone-dark);max-width:380px}
+
+/* ─── PACKAGE GRID (equal-height cards per row via grid stretch) ─── */
+.um-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
 @media(max-width:1200px){.um-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.um-grid{grid-template-columns:1fr}}
 
 /* ─── PACKAGE CARD ─── */
-.um-card{display:flex;flex-direction:column;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-md);border:1px solid transparent;padding:20px 20px 18px;transition:transform .4s var(--ease),box-shadow .4s var(--ease),border-color .4s var(--ease)}
+.um-card{display:flex;flex-direction:column;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-md);border:1px solid transparent;overflow:hidden;transition:transform .4s var(--ease),box-shadow .4s var(--ease),border-color .4s var(--ease)}
 .um-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--gold)}
+.um-card-popular{border-color:var(--gold);box-shadow:var(--shadow-gold)}
 
-.um-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
-.um-stars{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);border:1px solid rgba(13,110,253,.2);padding:5px 11px;border-radius:var(--r-pill)}
-.um-price{font-family:var(--font-display);font-size:26px;font-weight:400;color:var(--navy);line-height:1;text-align:right}
-.um-price small{display:block;font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--stone-dark)}
+/* Media header — neutral placeholder until real package photography exists */
+.um-card-media{position:relative;height:128px;background:var(--navy-grad);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.um-card-media::before,.um-card-media::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(126,201,255,.22);pointer-events:none}
+.um-card-media::before{width:210px;height:210px;top:-110px;right:-60px}
+.um-card-media::after{width:150px;height:150px;bottom:-80px;left:-40px}
+.um-card-media-mark{font-size:42px;line-height:1;opacity:.9;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
+.um-tier{position:absolute;top:12px;left:12px;font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:var(--r-pill)}
+.um-tier-economy{background:var(--white);color:var(--navy)}
+.um-tier-premium{background:var(--gold-pale);color:var(--navy)}
+.um-tier-vip{background:var(--btn-blue);color:var(--navy)}
+.um-badge{position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);background:var(--white);padding:5px 11px;border-radius:var(--r-pill);box-shadow:var(--shadow-sm)}
+.um-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.um-ribbon{position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);background:var(--btn-blue);padding:6px 16px;border-radius:var(--r-pill);box-shadow:var(--shadow-blue);white-space:nowrap;z-index:2}
 
-.um-card-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.um-pill{font-family:var(--font-body);font-size:10px;color:var(--stone-dark);background:var(--ivory);padding:3px 9px;border-radius:var(--r-pill);border:1px solid var(--ivory-mid)}
+.um-card-body{display:flex;flex-direction:column;flex:1;padding:20px 20px 18px}
+.um-card-popular .um-card-body{padding-top:24px}
+
+.um-card-head{display:flex;flex-direction:column;gap:3px;margin-bottom:12px}
+.um-card-name{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.25}
+.um-card-sub{font-family:var(--font-body);font-size:11px;color:var(--stone-dark)}
+
+/* Price — the most prominent element on the card */
+.um-price-block{display:flex;flex-direction:column;gap:2px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--ivory-mid)}
+.um-price-row{display:flex;align-items:baseline;gap:8px}
+.um-price-from{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--stone-dark)}
+.um-price-value{font-family:var(--font-display);font-size:30px;font-weight:700;color:var(--gold);line-height:1}
+.um-price-unit{font-family:var(--font-body);font-size:11px;color:var(--stone-dark)}
+
+/* Compact per-room pricing row (shared with the details modal) */
+.um-rates{display:flex;gap:8px;margin:0 0 14px}
+.um-rate{flex:1;display:flex;flex-direction:column;gap:2px;text-align:center;background:var(--ivory);border:1px solid var(--ivory-mid);border-radius:var(--r-md);padding:8px 6px}
+.um-rate dt{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--stone-dark)}
+.um-rate dd{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--navy);margin:0}
+.um-rate-base{background:var(--gold-pale);border-color:rgba(13,110,253,.2)}
+
+/* Icon meta rows — duration split, departures, flight */
+.um-meta{list-style:none;display:flex;flex-direction:column;gap:7px;margin:0 0 14px;padding:0}
+.um-meta li{display:flex;align-items:flex-start;gap:8px;font-family:var(--font-body);font-size:12px;color:var(--charcoal);line-height:1.45}
+.um-meta-icon{font-size:13px;line-height:1.4;flex-shrink:0}
 
 /* ─── HOTELS (Makkah & Madinah) ─── */
-.um-hotels{display:flex;flex-direction:column;gap:10px;flex:1;margin-bottom:16px}
+.um-hotels{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .um-hotel{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:2px solid var(--gold-pale)}
 .um-hotel-city{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .um-hotel-name{font-family:var(--font-body);font-size:13px;color:var(--navy);font-weight:500;line-height:1.35}
 .um-hotel-nights{font-family:var(--font-body);font-size:11px;color:var(--stone-dark)}
 
-/* ─── ACTIONS ─── */
-.um-card-actions{display:flex;border-top:1px solid var(--ivory-mid);padding-top:14px}
+/* Inclusions — compact icon + label grid */
+.um-incl{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin:0 0 16px;padding:12px;background:var(--ivory);border:1px solid var(--ivory-mid);border-radius:var(--r-md)}
+.um-incl li{display:flex;align-items:center;gap:6px;font-family:var(--font-body);font-size:11px;color:var(--charcoal);line-height:1.35}
+.um-incl-icon{font-size:12px;line-height:1;flex-shrink:0}
+
+/* ─── ACTIONS (pinned to the card bottom for equal-height rows) ─── */
+.um-card-actions{display:flex;gap:10px;border-top:1px solid var(--ivory-mid);padding-top:14px;margin-top:auto}
 .um-card-actions .btn-primary{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.um-btn-details{flex:1;background:transparent;border:1px solid var(--ivory-mid);color:var(--navy);padding:11px 14px;border-radius:var(--r-sm);font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-align:center;transition:all .25s var(--ease)}
+.um-btn-details:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ─── VIEW DETAILS MODAL ─── */
+.um-modal-overlay{position:fixed;inset:0;z-index:1200;background:rgba(13,26,74,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px}
+.um-modal{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:100%;max-width:640px;max-height:85vh;display:flex;flex-direction:column}
+.um-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid var(--ivory-mid)}
+.um-modal-head-text{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.um-modal-head-text .um-tier{position:static}
+.um-modal-head-text h3{font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--navy);line-height:1.25}
+.um-modal-price{font-family:var(--font-body);font-size:12px;color:var(--stone-dark)}
+.um-modal-close{flex-shrink:0;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;background:var(--ivory);border:1px solid var(--ivory-mid);border-radius:50%;color:var(--navy);font-size:14px;line-height:1;cursor:pointer;transition:all .25s var(--ease)}
+.um-modal-close:hover{border-color:var(--gold);color:var(--gold)}
+.um-modal-body{padding:20px 24px;overflow-y:auto}
+.um-modal-body section{margin-bottom:20px}
+.um-modal-body section:last-child{margin-bottom:0}
+.um-modal-body h4{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.um-modal-body ol,.um-modal-body ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.um-modal-body li{font-family:var(--font-body);font-size:13px;color:var(--charcoal);line-height:1.5}
+.um-modal-body .um-rates{margin-bottom:0}
+.um-modal-foot{display:flex;padding:16px 24px;border-top:1px solid var(--ivory-mid)}
+@media(max-width:640px){
+  .um-modal-overlay{padding:12px}
+  .um-modal{max-height:92vh}
+  .um-modal-head,.um-modal-body{padding:16px 18px}
+  .um-modal-foot{padding:14px 18px}
+}
