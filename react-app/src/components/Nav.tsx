@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useScrollSolid } from "../hooks/useScrollSolid";
 import { DESTINATIONS } from "../data/destinations";
-import { UMRAH_CITIES, umrahStarsShort } from "../data/umrah";
+import { UMRAH_CITIES } from "../data/umrah";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? "active" : undefined;
@@ -297,45 +297,70 @@ export function Nav() {
       aria-hidden={openDropdown !== "umrah"}
     >
       <div className="mega-inner">
-        <div className="mega-eyebrow">
-          Umrah packages by departure city · September
-        </div>
-        <div className="mega-filter-row">
-          {UMRAH_CITIES.map((city) => (
-            <div className="mega-group" key={city.id}>
-              <div className="mega-group-label">{city.city}</div>
-              <div className="mega-pills">
-                {city.packages.map((pkg) => {
-                  const to = `/umrah#${city.id}`;
-                  return (
-                    <a
-                      key={pkg.id}
-                      href={to}
-                      className="mega-pill"
-                      onClick={(e) => handleNav(e, to)}
-                    >
-                      <span>
-                        {umrahStarsShort(pkg.stars)} · {pkg.nights} ·{" "}
-                        {pkg.priceDisplay}
+        <div className="umrah-mega-layout">
+          {/* Left promo panel */}
+          <div className="umrah-mega-promo">
+            <span className="umrah-mega-icon" aria-hidden="true">🕋</span>
+            <div className="umrah-mega-promo-title">Umrah 2026</div>
+            <p className="umrah-mega-promo-sub">
+              Fully-priced packages departing from Perth, Melbourne &amp; Sydney
+            </p>
+            <ul className="umrah-mega-trust">
+              <li>✓ Steps from the Haram</li>
+              <li>✓ Return flights included</li>
+              <li>✓ Quad to double rooms</li>
+            </ul>
+            <Link
+              to="/umrah"
+              className="umrah-mega-cta"
+              onClick={() => setOpenDropdown(null)}
+            >
+              View all packages →
+            </Link>
+          </div>
+
+          {/* City summary cards */}
+          <div className="umrah-mega-cities">
+            {UMRAH_CITIES.map((city) => {
+              const fromPkg = city.packages.reduce(
+                (lo, p) => (p.price < lo.price ? p : lo),
+                city.packages[0],
+              );
+              const tiers = [
+                ...new Set(city.packages.flatMap((p) => (p.tier ? [p.tier] : []))),
+              ];
+              const to = `/umrah#${city.id}`;
+              return (
+                <a
+                  key={city.id}
+                  href={to}
+                  className="umrah-mega-city"
+                  onClick={(e) => handleNav(e, to)}
+                >
+                  <div className="umrah-mega-city-name">{city.city}</div>
+                  <div className="umrah-mega-city-count">
+                    {city.packages.length} packages · September
+                  </div>
+                  <div className="umrah-mega-city-price">
+                    From {fromPkg.priceDisplay}
+                  </div>
+                  <div className="umrah-mega-city-tiers">
+                    {tiers.map((tier) => (
+                      <span
+                        key={tier}
+                        className={`umrah-mega-tier umrah-tier-${tier.toLowerCase()}`}
+                      >
+                        {tier}
                       </span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mega-footer">
-          <Link
-            to="/umrah"
-            className="mega-footer-link"
-            onClick={() => setOpenDropdown(null)}
-          >
-            View all Umrah packages →
-          </Link>
-          <span className="mega-footer-meta">
-            Steps from the Haram · Quad occupancy · September departures
-          </span>
+                    ))}
+                  </div>
+                  <span className="umrah-mega-city-link">
+                    Browse {city.city} →
+                  </span>
+                </a>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

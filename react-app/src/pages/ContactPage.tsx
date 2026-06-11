@@ -54,7 +54,7 @@ export function ContactPage() {
   const [subscribe, setSubscribe] = useState(true);
   const [activeChannel, setActiveChannel] = useState("inquiry-section");
 
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
   const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
   const open = useMemo(() => isOpenNow(today), [today]);
 

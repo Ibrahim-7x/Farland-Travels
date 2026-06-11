@@ -32,12 +32,11 @@ export function DealsPage() {
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{ title: string } | null>(null);
 
-  // Sync category state ↔ URL query param so nav-dropdown links land filtered
-  useEffect(() => {
-    const fromUrl = (searchParams.get("cat") ?? "all").toLowerCase();
-    if (fromUrl !== activeCat) setActiveCat(fromUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  // Sync category state ↔ URL query param directly in render (recommended for synchronous URL sync)
+  const fromUrl = (searchParams.get("cat") ?? "all").toLowerCase();
+  if (fromUrl !== activeCat) {
+    setActiveCat(fromUrl);
+  }
 
   const selectCategory = (value: string) => {
     setActiveCat(value);

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   DESTINATIONS,
@@ -93,7 +93,7 @@ export function SearchResultsPage() {
   ];
 
   // Price calculation
-  let priceBlock: React.ReactNode = null;
+  let priceBlock: ReactNode = null;
   let priceUnavailable = false;
 
   if (isMakkah) {

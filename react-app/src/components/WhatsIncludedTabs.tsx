@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Destination } from "../data/destinations";
 import "./WhatsIncludedTabs.css";
 
@@ -383,10 +383,12 @@ function SectionSlideshow({
   sectionId: string;
 }) {
   const [idx, setIdx] = useState(0);
+  const [prevSectionId, setPrevSectionId] = useState(sectionId);
 
-  useEffect(() => {
+  if (sectionId !== prevSectionId) {
     setIdx(0);
-  }, [sectionId]);
+    setPrevSectionId(sectionId);
+  }
 
   const total = images.length;
   const go = (next: number) => setIdx(((next % total) + total) % total);
@@ -468,12 +470,14 @@ export function WhatsIncludedTabs({
   );
 
   const [activeId, setActiveId] = useState<string>(tabs[0]?.id ?? "");
+  const [prevBaseId, setPrevBaseId] = useState(`${destination.slug}-${tabs.length}`);
 
-  useEffect(() => {
+  if (prevBaseId !== `${destination.slug}-${tabs.length}`) {
     setActiveId(tabs[0]?.id ?? "");
-  }, [destination.slug, tabs]);
+    setPrevBaseId(`${destination.slug}-${tabs.length}`);
+  }
 
-  const active = tabs.find((t) => t.id === activeId) ?? tabs[0];
+  const active = tabs.find((t: Tab) => t.id === activeId) ?? tabs[0];
 
   if (!active) return null;
 

@@ -63,8 +63,6 @@ type UmrahCardProps = {
 };
 
 function UmrahPackageCard({ cityName, pkg, onDetails }: UmrahCardProps) {
-  const makkahMeta = hotelMeta(pkg.makkahRating, pkg.makkahDistance);
-  const madinahMeta = hotelMeta(pkg.madinahRating, pkg.madinahDistance);
   return (
     <article
       className={`um-card ${pkg.mostPopular ? "um-card-popular" : ""}`}
@@ -97,22 +95,6 @@ function UmrahPackageCard({ cityName, pkg, onDetails }: UmrahCardProps) {
           </span>
         </div>
 
-        {pkg.roomRates && pkg.roomRates.length > 0 && (
-          <dl className="um-rates">
-            {pkg.roomRates.map((rate) => (
-              <div
-                key={rate.room}
-                className={`um-rate ${
-                  rate.room === pkg.roomType ? "um-rate-base" : ""
-                }`}
-              >
-                <dt>{rate.room}</dt>
-                <dd>{rate.priceDisplay}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-
         <ul className="um-meta">
           <li>
             <span className="um-meta-icon" aria-hidden="true">
@@ -128,45 +110,7 @@ function UmrahPackageCard({ cityName, pkg, onDetails }: UmrahCardProps) {
               ? `Departs ${pkg.departureDates.join(" & ")}`
               : `${pkg.month} departures`}
           </li>
-          {pkg.flight && (
-            <li>
-              <span className="um-meta-icon" aria-hidden="true">
-                ✈️
-              </span>
-              {pkg.flight.airline} · {pkg.flight.routing}
-            </li>
-          )}
         </ul>
-
-        <div className="um-hotels">
-          <div className="um-hotel">
-            <span className="um-hotel-city">🕋 Makkah · {pkg.makkahNights}</span>
-            <span className="um-hotel-name">{pkg.makkahHotel}</span>
-            {makkahMeta && <span className="um-hotel-nights">{makkahMeta}</span>}
-          </div>
-          <div className="um-hotel">
-            <span className="um-hotel-city">
-              🕌 Madinah · {pkg.madinahNights}
-            </span>
-            <span className="um-hotel-name">{pkg.madinahHotel}</span>
-            {madinahMeta && (
-              <span className="um-hotel-nights">{madinahMeta}</span>
-            )}
-          </div>
-        </div>
-
-        {pkg.inclusions && pkg.inclusions.length > 0 && (
-          <ul className="um-incl">
-            {pkg.inclusions.map((key) => (
-              <li key={key}>
-                <span className="um-incl-icon" aria-hidden="true">
-                  {INCLUSION_META[key].icon}
-                </span>
-                {INCLUSION_META[key].label}
-              </li>
-            ))}
-          </ul>
-        )}
 
         <div className="um-card-actions">
           <Link to="/contact#inquiry-section" className="btn-primary">
@@ -193,6 +137,8 @@ type UmrahDetailsModalProps = {
 
 function UmrahDetailsModal({ cityName, pkg, onClose }: UmrahDetailsModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const makkahMeta = hotelMeta(pkg.makkahRating, pkg.makkahDistance);
+  const madinahMeta = hotelMeta(pkg.madinahRating, pkg.madinahDistance);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -250,6 +196,18 @@ function UmrahDetailsModal({ cityName, pkg, onClose }: UmrahDetailsModalProps) {
               From {pkg.priceDisplay} AUD per person ·{" "}
               {pkg.roomType.toLowerCase()} share
             </p>
+            <p className="um-modal-meta-line">
+              <span aria-hidden="true">📅</span>{" "}
+              {pkg.departureDates?.length
+                ? `Departs ${pkg.departureDates.join(" & ")}`
+                : `${pkg.month} departures`}
+            </p>
+            {pkg.flight && (
+              <p className="um-modal-meta-line">
+                <span aria-hidden="true">✈️</span> {pkg.flight.airline} ·{" "}
+                {pkg.flight.routing}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -262,6 +220,22 @@ function UmrahDetailsModal({ cityName, pkg, onClose }: UmrahDetailsModalProps) {
         </header>
 
         <div className="um-modal-body">
+          <section>
+            <h4>Hotels</h4>
+            <div className="um-hotels">
+              <div className="um-hotel">
+                <span className="um-hotel-city">🕋 Makkah · {pkg.makkahNights}</span>
+                <span className="um-hotel-name">{pkg.makkahHotel}</span>
+                {makkahMeta && <span className="um-hotel-nights">{makkahMeta}</span>}
+              </div>
+              <div className="um-hotel">
+                <span className="um-hotel-city">🕌 Madinah · {pkg.madinahNights}</span>
+                <span className="um-hotel-name">{pkg.madinahHotel}</span>
+                {madinahMeta && <span className="um-hotel-nights">{madinahMeta}</span>}
+              </div>
+            </div>
+          </section>
+
           <section>
             <h4>Itinerary</h4>
             <ol>

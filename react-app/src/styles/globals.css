@@ -196,10 +196,38 @@ button{font-family:inherit}
 .deals-mega-cta{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:4px;transition:color .2s}
 .mega-dropdown .deals-mega-card:hover .deals-mega-cta{color:var(--navy)}
 
+/* ─── UMRAH MEGA (city-summary cards variant) ─── */
+.umrah-mega-layout{display:flex;gap:24px;align-items:stretch}
+.umrah-mega-promo{flex-shrink:0;width:190px;display:flex;flex-direction:column;gap:10px;padding-right:24px;border-right:1px solid var(--ivory-mid)}
+.umrah-mega-icon{font-size:28px;line-height:1}
+.umrah-mega-promo-title{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--navy);line-height:1.2}
+.umrah-mega-promo-sub{font-family:var(--font-body);font-size:12px;color:var(--stone-dark);line-height:1.5;margin:0}
+.umrah-mega-trust{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.umrah-mega-trust li{font-family:var(--font-body);font-size:11px;color:var(--charcoal)}
+.mega-dropdown .umrah-mega-cta{display:inline-flex;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;margin-top:auto;padding-top:6px;transition:color .2s;position:static;opacity:1}
+.mega-dropdown .umrah-mega-cta::before,.mega-dropdown .umrah-mega-cta::after{content:none;display:none}
+.mega-dropdown .umrah-mega-cta:hover{color:var(--navy)}
+
+.umrah-mega-cities{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mega-dropdown .umrah-mega-city{display:flex;flex-direction:column;gap:4px;padding:14px 16px;background:var(--ivory);border:1px solid var(--ivory-mid);border-radius:var(--r-md);text-decoration:none;color:var(--navy);transition:all .22s var(--ease);font-family:var(--font-body);letter-spacing:0;text-transform:none;position:static;opacity:1}
+.mega-dropdown .umrah-mega-city::before,.mega-dropdown .umrah-mega-city::after{content:none;display:none}
+.mega-dropdown .umrah-mega-city:hover{background:var(--gold-pale);border-color:rgba(13,110,253,.2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(13,26,74,.10)}
+.umrah-mega-city-name{font-family:var(--font-body);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--navy)}
+.umrah-mega-city-count{font-family:var(--font-body);font-size:10px;color:var(--stone-dark)}
+.umrah-mega-city-price{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--gold);line-height:1;margin:4px 0 2px}
+.umrah-mega-city-tiers{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.umrah-mega-tier{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.umrah-tier-economy{background:var(--white);color:var(--navy);border:1px solid var(--ivory-mid)}
+.umrah-tier-premium{background:var(--gold-pale);color:var(--navy);border:1px solid rgba(218,165,32,.3)}
+.umrah-tier-vip{background:var(--btn-blue);color:var(--navy);border:1px solid rgba(13,110,253,.2)}
+.umrah-mega-city-link{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:8px;transition:color .2s}
+.mega-dropdown .umrah-mega-city:hover .umrah-mega-city-link{color:var(--navy)}
+
 @media(max-width:1100px){
   .mega-filter-row{gap:18px}
   .mega-group{min-width:150px;padding-right:18px}
   .deals-mega-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+  .umrah-mega-promo{width:160px}
 }
 @media(max-width:860px){
   /* Disable mega-dropdown on mobile — rely on the standard mobile menu */

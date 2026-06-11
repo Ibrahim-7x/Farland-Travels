@@ -4,7 +4,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
   type CSSProperties,
+  type FormEvent,
   type KeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
@@ -157,14 +159,10 @@ export function SearchBar({
     return getAllMonths();
   }, [selectedDest]);
 
-  useEffect(() => {
-    if (
-      selectedMonth &&
-      !availableMonths.includes(selectedMonth)
-    ) {
-      setSelectedMonth(null);
-    }
-  }, [availableMonths, selectedMonth]);
+  // Handle month mismatch via direct state check during render (recommended for synchronous state sync)
+  if (selectedMonth && !availableMonths.includes(selectedMonth)) {
+    setSelectedMonth(null);
+  }
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -184,9 +182,14 @@ export function SearchBar({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  useEffect(() => {
-    if (destOpen) setDestHighlight(0);
-  }, [destQuery, destOpen]);
+  // Handle highlight reset during render transition
+  const [prevDestOpen, setPrevDestOpen] = useState(destOpen);
+  if (destOpen && !prevDestOpen) {
+    setDestHighlight(0);
+    setPrevDestOpen(true);
+  } else if (!destOpen && prevDestOpen) {
+    setPrevDestOpen(false);
+  }
 
   const selectDestination = (d: Destination) => {
     setSelectedDest(d);
@@ -206,12 +209,12 @@ export function SearchBar({
     if (e.key === "ArrowDown") {
       e.preventDefault();
       if (!destOpen) setDestOpen(true);
-      setDestHighlight((h) =>
+      setDestHighlight((h: number) =>
         Math.min(filteredDestinations.length - 1, h + 1)
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setDestHighlight((h) => Math.max(0, h - 1));
+      setDestHighlight((h: number) => Math.max(0, h - 1));
     } else if (e.key === "Enter") {
       if (destOpen && filteredDestinations[destHighlight]) {
         e.preventDefault();
@@ -245,7 +248,7 @@ export function SearchBar({
   return (
     <form
       className={`sb sb-${variant}`}
-      onSubmit={(e) => {
+      onSubmit={(e: FormEvent) => {
         e.preventDefault();
         onSearch();
       }}
@@ -266,7 +269,7 @@ export function SearchBar({
             autoComplete="off"
             placeholder="Where do you dream of going?"
             value={destQuery}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setDestQuery(e.target.value);
               if (selectedDest && e.target.value !== selectedDest.name) {
                 setSelectedDest(null);
@@ -303,7 +306,7 @@ export function SearchBar({
                   No destinations match "{destQuery}"
                 </div>
               ) : (
-                filteredDestinations.map((d, i) => (
+                filteredDestinations.map((d: Destination, i: number) => (
                   <button
                     type="button"
                     key={d.slug}
@@ -334,7 +337,7 @@ export function SearchBar({
         <button
           type="button"
           className="sb-trigger"
-          onClick={() => setMonthOpen((o) => !o)}
+          onClick={() => setMonthOpen((o: boolean) => !o)}
           aria-expanded={monthOpen}
         >
           {selectedMonth ? (
