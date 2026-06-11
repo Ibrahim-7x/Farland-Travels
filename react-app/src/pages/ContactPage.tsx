@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { UMRAH_CITIES } from "../data/umrah";
 import "./ContactPage.css";
 
 type Step = 1 | 2 | 3 | 4;
@@ -45,14 +46,28 @@ export function ContactPage() {
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  // Holiday-specific
   const [destinations, setDestinations] = useState<Set<string>>(new Set());
   const [otherDest, setOtherDest] = useState("");
   const [budget, setBudget] = useState(3500);
   const [tripTypes, setTripTypes] = useState<Set<string>>(new Set(["💍 Honeymoon"]));
+  // Destination tab
+  const [destTab, setDestTab] = useState<"holiday" | "umrah">("holiday");
+  // Umrah-specific
+  const [umrahCity, setUmrahCity] = useState("");
+  const [umrahTier, setUmrahTier] = useState("");
+  const [umrahRoomType, setUmrahRoomType] = useState("Quad");
+  const [umrahDeparture, setUmrahDeparture] = useState("");
+  const [pilgrims, setPilgrims] = useState(4);
   const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
   const [subscribe, setSubscribe] = useState(true);
   const [activeChannel, setActiveChannel] = useState("inquiry-section");
+
+  const selectedCityPkgs = UMRAH_CITIES.find((c) => c.id === umrahCity)?.packages ?? [];
+  const umrahAvailableDates = [
+    ...new Set(selectedCityPkgs.flatMap((p) => p.departureDates ?? [])),
+  ];
 
   const today = useMemo(() => new Date(), []);
   const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
@@ -285,68 +300,132 @@ export function ContactPage() {
 
               {step === 2 && (
                 <div className="form-panel">
-                  <p
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: 13,
-                      color: "var(--stone-dark)",
-                      marginBottom: 16,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Select your dream destination or destinations — you can choose more than one:
-                  </p>
-                  <div className="dest-selector">
-                    {DEST_OPTIONS.map((d) => (
-                      <div
-                        key={d.key}
-                        className={`dest-opt ${destinations.has(d.key) ? "selected" : ""}`}
-                        onClick={() => toggleDest(d.key)}
-                      >
-                        <img src={d.img} alt={d.key} />
-                        <div className="dest-opt-overlay"></div>
-                        <div className="dest-opt-label">{d.key}</div>
-                        <div className="dest-opt-check">✓</div>
-                      </div>
-                    ))}
-                    <div
-                      className={`dest-opt other-dest ${
-                        destinations.has("Other") ? "selected" : ""
-                      }`}
-                      onClick={() => toggleDest("Other")}
+                  {/* Tab toggle: Holiday vs Umrah */}
+                  <div className="dest-type-toggle">
+                    <button
+                      type="button"
+                      className={`dest-type-btn ${destTab === "holiday" ? "active" : ""}`}
+                      onClick={() => setDestTab("holiday")}
                     >
-                      <div style={{ textAlign: "center", padding: 12 }}>
-                        <div style={{ fontSize: 24, marginBottom: 4 }}>🌍</div>
+                      🌍 Holiday Destinations
+                    </button>
+                    <button
+                      type="button"
+                      className={`dest-type-btn ${destTab === "umrah" ? "active" : ""}`}
+                      onClick={() => setDestTab("umrah")}
+                    >
+                      🕋 Umrah Packages
+                    </button>
+                  </div>
+
+                  {destTab === "holiday" && (
+                    <>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-body)",
+                          fontSize: 13,
+                          color: "var(--stone-dark)",
+                          marginBottom: 16,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        Select your dream destination or destinations — you can choose more than one:
+                      </p>
+                      <div className="dest-selector">
+                        {DEST_OPTIONS.map((d) => (
+                          <div
+                            key={d.key}
+                            className={`dest-opt ${destinations.has(d.key) ? "selected" : ""}`}
+                            onClick={() => toggleDest(d.key)}
+                          >
+                            <img src={d.img} alt={d.key} />
+                            <div className="dest-opt-overlay"></div>
+                            <div className="dest-opt-label">{d.key}</div>
+                            <div className="dest-opt-check">✓</div>
+                          </div>
+                        ))}
                         <div
-                          style={{
-                            fontFamily: "var(--font-body)",
-                            fontSize: 11,
-                            color: "rgba(255,255,255,.7)",
-                            fontWeight: 600,
-                            letterSpacing: ".08em",
-                            textTransform: "uppercase",
-                          }}
+                          className={`dest-opt other-dest ${
+                            destinations.has("Other") ? "selected" : ""
+                          }`}
+                          onClick={() => toggleDest("Other")}
                         >
-                          Other / Not sure
+                          <div style={{ textAlign: "center", padding: 12 }}>
+                            <div style={{ fontSize: 24, marginBottom: 4 }}>🌍</div>
+                            <div
+                              style={{
+                                fontFamily: "var(--font-body)",
+                                fontSize: 11,
+                                color: "rgba(255,255,255,.7)",
+                                fontWeight: 600,
+                                letterSpacing: ".08em",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Other / Not sure
+                            </div>
+                          </div>
+                          <div className="dest-opt-check">✓</div>
                         </div>
                       </div>
-                      <div className="dest-opt-check">✓</div>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="inq-other">Or type a destination</label>
-                    <div className="input-wrap">
-                      <span className="input-icon">🗺</span>
-                      <input
-                        className="form-input"
-                        id="inq-other"
-                        type="text"
-                        placeholder="e.g. Santorini, Rajasthan, Seychelles…"
-                        value={otherDest}
-                        onChange={(e) => setOtherDest(e.target.value)}
-                      />
-                    </div>
-                  </div>
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="inq-other">Or type a destination</label>
+                        <div className="input-wrap">
+                          <span className="input-icon">🗺</span>
+                          <input
+                            className="form-input"
+                            id="inq-other"
+                            type="text"
+                            placeholder="e.g. Santorini, Rajasthan, Seychelles…"
+                            value={otherDest}
+                            onChange={(e) => setOtherDest(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {destTab === "umrah" && (
+                    <>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-body)",
+                          fontSize: 13,
+                          color: "var(--stone-dark)",
+                          marginBottom: 16,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        Select your departure city for Umrah — September 2026:
+                      </p>
+                      <div className="umrah-city-grid">
+                        {UMRAH_CITIES.map((city) => {
+                          const fromPkg = city.packages.reduce(
+                            (lo, p) => (p.price < lo.price ? p : lo),
+                            city.packages[0],
+                          );
+                          return (
+                            <div
+                              key={city.id}
+                              className={`umrah-city-card ${umrahCity === city.id ? "selected" : ""}`}
+                              onClick={() => setUmrahCity(city.id)}
+                            >
+                              <div className="ucc-check">✓</div>
+                              <span className="ucc-icon">🕋</span>
+                              <div className="ucc-name">{city.city}</div>
+                              <div className="ucc-count">
+                                {city.packages.length} packages
+                              </div>
+                              <div className="ucc-price">
+                                From {fromPkg.priceDisplay}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+
                   <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
                     <button
                       type="button"
@@ -359,15 +438,210 @@ export function ContactPage() {
                     <button
                       type="button"
                       className="btn-submit btn-navy-full"
+                      disabled={destTab === "umrah" && !umrahCity}
                       onClick={() => setStep(3)}
                     >
-                      Continue — Travel Details →
+                      {destTab === "umrah"
+                        ? "Continue — Umrah Details →"
+                        : "Continue — Travel Details →"}
                     </button>
                   </div>
                 </div>
               )}
 
-              {step === 3 && (
+              {step === 3 && destTab === "umrah" && (
+                <div className="form-panel">
+                  {/* City summary banner */}
+                  <div className="umrah-enquiry-city">
+                    <span>🕋</span>
+                    <div>
+                      <div>Departure city</div>
+                      <strong>
+                        {UMRAH_CITIES.find((c) => c.id === umrahCity)?.city}
+                      </strong>
+                    </div>
+                    <button type="button" onClick={() => setStep(2)}>
+                      Change
+                    </button>
+                  </div>
+
+                  {/* Package tier */}
+                  <div className="form-group">
+                    <label className="form-label">Package tier preference</label>
+                    <div className="type-chips">
+                      {["💼 Economy", "⭐ Premium", "👑 VIP", "No preference"].map((t) => {
+                        const key = t.replace(/^[^\s]+ /, "").trim();
+                        return (
+                          <div
+                            key={t}
+                            className={`type-chip ${umrahTier === key ? "on" : ""}`}
+                            onClick={() => setUmrahTier(umrahTier === key ? "" : key)}
+                          >
+                            {t}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Room sharing */}
+                  <div className="form-group">
+                    <label className="form-label">Room sharing preference</label>
+                    <div className="umrah-room-chips">
+                      {(
+                        [
+                          { key: "Quad", desc: "4 per room · most affordable" },
+                          { key: "Triple", desc: "3 per room" },
+                          { key: "Double", desc: "2 per room · most privacy" },
+                        ] as const
+                      ).map(({ key, desc }) => (
+                        <div
+                          key={key}
+                          className={`umrah-room-chip ${umrahRoomType === key ? "on" : ""}`}
+                          onClick={() => setUmrahRoomType(key)}
+                        >
+                          <div className="urc-name">{key}</div>
+                          <div className="urc-desc">{desc}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Departure dates from selected city */}
+                  {umrahAvailableDates.length > 0 && (
+                    <div className="form-group">
+                      <label className="form-label">Preferred departure date</label>
+                      <div className="type-chips">
+                        {umrahAvailableDates.map((date) => (
+                          <div
+                            key={date}
+                            className={`type-chip ${umrahDeparture === date ? "on" : ""}`}
+                            onClick={() =>
+                              setUmrahDeparture(umrahDeparture === date ? "" : date)
+                            }
+                          >
+                            📅 {date}
+                          </div>
+                        ))}
+                        <div
+                          className={`type-chip ${umrahDeparture === "flexible" ? "on" : ""}`}
+                          onClick={() =>
+                            setUmrahDeparture(
+                              umrahDeparture === "flexible" ? "" : "flexible",
+                            )
+                          }
+                        >
+                          Flexible
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pilgrims + Duration */}
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="inq-pilgrims">
+                        Number of pilgrims
+                      </label>
+                      <div className="input-wrap">
+                        <span className="input-icon">👥</span>
+                        <input
+                          className="form-input"
+                          id="inq-pilgrims"
+                          type="number"
+                          min={1}
+                          max={20}
+                          value={pilgrims}
+                          onChange={(e) => setPilgrims(Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="inq-umrah-dur">
+                        Package duration
+                      </label>
+                      <select
+                        className="form-select"
+                        id="inq-umrah-dur"
+                        defaultValue="10 nights"
+                      >
+                        <option>7 nights</option>
+                        <option>10 nights</option>
+                        <option>14 nights</option>
+                        <option>Any duration</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="inq-umrah-msg">
+                      Special requests / questions
+                    </label>
+                    <textarea
+                      className="form-textarea"
+                      id="inq-umrah-msg"
+                      placeholder="Accessibility needs, group requirements, room preferences, or anything else about your pilgrimage…"
+                      rows={3}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="consent-row">
+                    <input
+                      type="checkbox"
+                      id="inq-subscribe-u"
+                      checked={subscribe}
+                      onChange={(e) => setSubscribe(e.target.checked)}
+                    />
+                    <label htmlFor="inq-subscribe-u">
+                      ✉ Yes, send me Farland's travel inspiration and Umrah updates.
+                      Unsubscribe any time.
+                    </label>
+                  </div>
+                  <div className="consent-row">
+                    <input
+                      type="checkbox"
+                      id="inq-consent-u"
+                      checked={consent}
+                      onChange={(e) => setConsent(e.target.checked)}
+                    />
+                    <label htmlFor="inq-consent-u">
+                      I agree to be contacted by Farland Holidays regarding my enquiry
+                      and confirm I have read the{" "}
+                      <a href="#privacy">Privacy Policy</a>. I can unsubscribe at any
+                      time.
+                    </label>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      type="button"
+                      className="btn-submit btn-outline-full"
+                      style={{ maxWidth: 100, padding: 12 }}
+                      onClick={() => setStep(2)}
+                    >
+                      ← Back
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-submit btn-gold-full"
+                      onClick={submitInquiry}
+                    >
+                      🕋 Send Umrah Enquiry →
+                    </button>
+                  </div>
+                  <div className="trust-row">
+                    <div className="trust-item">🔒 <span>Secure &amp; confidential</span></div>
+                    <div className="trust-item">⚡ <span>Reply in 2 hours</span></div>
+                    <div className="trust-item">💰 <span>No booking fees</span></div>
+                    <div className="trust-item">🛡 <span>Fully protected</span></div>
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && destTab === "holiday" && (
                 <div className="form-panel">
                   <div className="form-row-2">
                     <div className="form-group">
