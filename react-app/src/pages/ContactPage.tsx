@@ -61,7 +61,6 @@ export function ContactPage() {
   const [pilgrims, setPilgrims] = useState(4);
   const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
-  const [subscribe, setSubscribe] = useState(true);
   const [activeChannel, setActiveChannel] = useState("inquiry-section");
 
   const selectedCityPkgs = UMRAH_CITIES.find((c) => c.id === umrahCity)?.packages ?? [];
@@ -591,18 +590,6 @@ export function ContactPage() {
                   <div className="consent-row">
                     <input
                       type="checkbox"
-                      id="inq-subscribe-u"
-                      checked={subscribe}
-                      onChange={(e) => setSubscribe(e.target.checked)}
-                    />
-                    <label htmlFor="inq-subscribe-u">
-                      ✉ Yes, send me Farland's travel inspiration and Umrah updates.
-                      Unsubscribe any time.
-                    </label>
-                  </div>
-                  <div className="consent-row">
-                    <input
-                      type="checkbox"
                       id="inq-consent-u"
                       checked={consent}
                       onChange={(e) => setConsent(e.target.checked)}
@@ -753,18 +740,6 @@ export function ContactPage() {
                   <div className="consent-row">
                     <input
                       type="checkbox"
-                      id="inq-subscribe"
-                      checked={subscribe}
-                      onChange={(e) => setSubscribe(e.target.checked)}
-                    />
-                    <label htmlFor="inq-subscribe">
-                      ✉ Yes, send me Farland's monthly travel inspiration and
-                      subscriber-only deals. Unsubscribe any time.
-                    </label>
-                  </div>
-                  <div className="consent-row">
-                    <input
-                      type="checkbox"
                       id="inq-consent"
                       checked={consent}
                       onChange={(e) => setConsent(e.target.checked)}
@@ -807,13 +782,7 @@ export function ContactPage() {
                   <h3>Enquiry Sent!</h3>
                   <p>
                     Thank you — your enquiry has been received. A member of our team will
-                    be in touch within 2 working hours.
-                    {subscribe && (
-                      <>
-                        {" "}You've also been added to our travel inspiration list —
-                        your first edition arrives Thursday.
-                      </>
-                    )}{" "}
+                    be in touch within 2 working hours.{" "}
                     In the meantime, why not explore our{" "}
                     <Link to="/deals" style={{ color: "var(--gold)" }}>
                       latest deals

@@ -551,25 +551,6 @@ export function UmrahPage() {
         />
       )}
 
-      {/* NEWSLETTER */}
-      <div className="nl-section">
-        <div className="nl-inner">
-          <div className="nl-eyebrow">Plan your sacred journey</div>
-          <h2 className="nl-title">Speak to an Umrah Specialist</h2>
-          <p className="nl-sub">
-            Our team will tailor your dates, hotels, and occupancy — and hold
-            your price while you decide.
-          </p>
-          <form className="nl-form" onSubmit={(e) => e.preventDefault()}>
-            <input
-              className="nl-input"
-              type="email"
-              placeholder="Enter your email address"
-            />
-            <button type="submit">Get in touch ↗</button>
-          </form>
-        </div>
-      </div>
     </>
   );
 }

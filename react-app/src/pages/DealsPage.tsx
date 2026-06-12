@@ -335,32 +335,6 @@ export function DealsPage() {
         </div>
       </div>
 
-      {/* NEWSLETTER */}
-      <div className="nl-section">
-        <div className="nl-inner">
-          <div className="nl-eyebrow">Get exclusive deals first</div>
-          <h2 className="nl-title">Never Miss a Price Drop</h2>
-          <p className="nl-sub">
-            Join 45,000+ subscribers who get early access to seasonal offers — delivered
-            to their inbox before anyone else.
-          </p>
-          <form className="nl-form" onSubmit={(e) => e.preventDefault()}>
-            <input className="nl-input" type="email" placeholder="Enter your email address" />
-            <button type="submit">Subscribe ↗</button>
-          </form>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 11,
-              color: "rgba(255,255,255,.3)",
-              marginTop: 14,
-            }}
-          >
-            No spam. Unsubscribe any time. Your data is never sold.
-          </p>
-        </div>
-      </div>
-
       <div className={`toast ${toast ? "show" : ""}`}>
         <div className="toast-inner">
           <span className="toast-icon">✅</span>

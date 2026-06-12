@@ -171,32 +171,12 @@
 .cta-feature::before{content:'✓';color:var(--gold);font-weight:600}
 .cta-btns{display:flex;gap:14px;flex-wrap:wrap}
 
-/* ─── NEWSLETTER ─── */
-#newsletter{padding:clamp(72px,8vw,100px) clamp(20px,5vw,60px);background:var(--ivory)}
-.newsletter-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-@media(max-width:760px){.newsletter-inner{grid-template-columns:1fr;gap:40px}}
-.newsletter-perks{display:flex;flex-direction:column;gap:16px;margin-top:32px}
-.perk{display:flex;align-items:flex-start;gap:14px}
-.perk-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.perk-text h5{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px}
-.perk-text p{font-family:var(--font-body);font-size:12px;color:var(--stone-dark);line-height:1.5}
-.newsletter-form{background:var(--white);border-radius:var(--r-xl);padding:40px 36px;box-shadow:var(--shadow-md)}
-.newsletter-form-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--navy);margin-bottom:6px}
-.newsletter-form-sub{font-family:var(--font-body);font-size:13px;color:var(--stone-dark);margin-bottom:28px;line-height:1.6}
+/* Generic form rules: other pages' forms (Contact, detail/search enquiry)
+   pick up base properties from these via the global cascade — keep them
+   even though the homepage itself no longer renders a matching form. */
 .form-group{margin-bottom:16px}
 .form-group label{display:block;font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:6px}
 .form-group input,.form-group select{width:100%;padding:13px 16px;border:1.5px solid var(--ivory-mid);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;color:var(--navy);background:var(--ivory);outline:none;transition:border-color .2s,box-shadow .2s}
 .form-group input:focus,.form-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(13,110,253,.12);background:var(--white)}
 .form-group input::placeholder{color:var(--stone)}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.form-consent{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px}
-.form-consent input{width:16px;height:16px;accent-color:var(--gold);flex-shrink:0;margin-top:2px}
-.form-consent span{font-family:var(--font-body);font-size:11px;color:var(--stone-dark);line-height:1.5}
-.form-consent a{color:var(--gold)}
-.newsletter-note{font-family:var(--font-body);font-size:11px;color:var(--text-muted);margin-top:12px;text-align:center}
-.newsletter-social-proof{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:center}
-.sp-avatars{display:flex}
-.sp-avatars img{width:26px;height:26px;border-radius:50%;border:2px solid var(--white);margin-right:-6px;object-fit:cover}
-.sp-avatars img:last-child{margin-right:0}
-.sp-text{font-family:var(--font-body);font-size:11px;color:var(--stone-dark);margin-left:10px}
-.sp-text strong{color:var(--navy)}
