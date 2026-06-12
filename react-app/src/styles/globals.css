@@ -254,8 +254,6 @@ footer.site-footer{background:var(--navy-grad);padding:clamp(60px,7vw,96px) clam
 .footer-links a:hover{color:var(--white)}
 .footer-base{border-top:1px solid rgba(255,255,255,.06);padding:24px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
 .footer-legal{font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,.22)}
-.footer-trust-badges{display:flex;gap:10px;flex-wrap:wrap}
-.ftrust{font-family:var(--font-body);font-size:10px;letter-spacing:.02em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:4px 10px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,.10)}
 
 /* ─── REVEAL ANIMATION ─── */
 @media(prefers-reduced-motion:no-preference){

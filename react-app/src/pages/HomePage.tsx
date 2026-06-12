@@ -1,27 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DESTINATIONS } from "../data/destinations";
 import { SearchBar } from "../components/SearchBar";
 import "./HomePage.css";
 
-function pad(n: number): string {
-  return String(n).padStart(2, "0");
-}
-
 export function HomePage() {
-  const [totalSecs, setTotalSecs] = useState(18 * 3600 + 42 * 60 + 7);
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setTotalSecs((s) => Math.max(0, s - 1));
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const h = Math.floor(totalSecs / 3600);
-  const m = Math.floor((totalSecs % 3600) / 60);
-  const s = totalSecs % 60;
 
   const toggleWish = (key: string) =>
     setWishlist((w) => ({ ...w, [key]: !w[key] }));
@@ -71,10 +55,6 @@ export function HomePage() {
           <div className="hero-stat">
             <strong>15+</strong>
             <small>Years of expertise</small>
-          </div>
-          <div className="hero-stat">
-            <strong>4.9★</strong>
-            <small>Trustpilot rating</small>
           </div>
           <div className="hero-stat">
             <strong>12,000+</strong>
@@ -212,25 +192,6 @@ export function HomePage() {
                 Live published prices on our four signature journeys.
               </p>
             </div>
-            <div className="countdown-bar">
-              <span className="label">Deals expire in</span>
-              <div className="countdown-timer">
-                <div className="time-block">
-                  <strong>{pad(h)}</strong>
-                  <small>hrs</small>
-                </div>
-                <span className="time-sep">:</span>
-                <div className="time-block">
-                  <strong>{pad(m)}</strong>
-                  <small>min</small>
-                </div>
-                <span className="time-sep">:</span>
-                <div className="time-block">
-                  <strong>{pad(s)}</strong>
-                  <small>sec</small>
-                </div>
-              </div>
-            </div>
           </div>
           <div className="deals-grid">
             {deals.slice(0, 3).map((d, i) => (
@@ -362,111 +323,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section id="testimonials">
-        <div className="testimonials-inner">
-          <div className="testimonials-header">
-            <h2 className="section-title" style={{ textAlign: "center" }}>
-              Heard from Our Travellers
-            </h2>
-          </div>
-          <div className="testi-grid">
-            <div className="testi-card reveal">
-              <div className="testi-quote-mark">&ldquo;</div>
-              <div className="testi-stars">★★★★★</div>
-              <p className="testi-text">
-                "Farland turned a daydream into an itinerary — Singapore and Bali back to
-                back was the easiest two weeks of our lives."
-              </p>
-              <div className="testi-dest-tag">
-                <span>✈ Singapore &amp; Bali</span>
-              </div>
-              <div className="testi-author">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=70"
-                  alt="Sarah M"
-                  className="testi-avatar"
-                />
-                <div className="testi-author-info">
-                  <h5>Sarah Mitchell</h5>
-                  <small>11-night escape · Perth</small>
-                </div>
-              </div>
-              <div className="testi-platform">Trustpilot</div>
-            </div>
-
-            <div className="testi-card highlight reveal reveal-delay-1">
-              <div className="testi-quote-mark">&ldquo;</div>
-              <div className="testi-stars">★★★★★</div>
-              <p className="testi-text">
-                "The Bali long-stay was perfect — four very different resorts in twenty
-                nights. Every transfer was waiting. Every detail was thought through."
-              </p>
-              <div className="testi-dest-tag">
-                <span>✈ Bali Long Stay</span>
-              </div>
-              <div className="testi-author">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=70"
-                  alt="James P"
-                  className="testi-avatar"
-                />
-                <div className="testi-author-info">
-                  <h5>James Pemberton</h5>
-                  <small>20-night Bali · Perth</small>
-                </div>
-              </div>
-              <div className="testi-platform">Google</div>
-            </div>
-
-            <div className="testi-card reveal reveal-delay-2">
-              <div className="testi-quote-mark">&ldquo;</div>
-              <div className="testi-stars">★★★★★</div>
-              <p className="testi-text">
-                "Our Umrah was handled with the care it deserved. Hotels minutes from the
-                Haram, transfers all arranged. We will only travel with Farland from now
-                on."
-              </p>
-              <div className="testi-dest-tag">
-                <span>✈ Makkah &amp; Madinah</span>
-              </div>
-              <div className="testi-author">
-                <img
-                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=70"
-                  alt="Priya K"
-                  className="testi-avatar"
-                />
-                <div className="testi-author-info">
-                  <h5>Yasmin Khan</h5>
-                  <small>10-night Umrah · Manchester</small>
-                </div>
-              </div>
-              <div className="testi-platform">Trustpilot</div>
-            </div>
-          </div>
-          <div className="trustpilot-bar reveal">
-            <div className="trust-item">
-              <strong>4.9 / 5</strong>
-              <span>Trustpilot rating</span>
-            </div>
-            <div className="trust-divider"></div>
-            <div className="trust-item">
-              <strong>12,400+</strong>
-              <span>Holidays crafted</span>
-            </div>
-            <div className="trust-divider"></div>
-            <div className="trust-item">
-              <strong>98%</strong>
-              <span>Would recommend us</span>
-            </div>
-            <div className="trust-divider"></div>
-            <div className="trust-item">
-              <strong>Fully protected</strong>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA BANNER */}
       <section id="cta-banner">
         <div className="cta-bg">
@@ -491,7 +347,7 @@ export function HomePage() {
               <span className="cta-feature">No booking fees</span>
               <span className="cta-feature">Price match guarantee</span>
               <span className="cta-feature">Expert consultation included</span>
-              <span className="cta-feature">Fullyprotected</span>
+              <span className="cta-feature">Fully protected</span>
             </div>
             <div className="cta-btns">
               <Link to="/contact#inquiry-section" className="btn btn-gold">

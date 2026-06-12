@@ -13,8 +13,6 @@ const CATEGORIES = [
   { value: "cruise", label: "🛳 Cruise" },
 ];
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
 function parsePrice(s: string): number {
   return Number(s.replace(/[^0-9.]/g, "")) || 0;
 }
@@ -25,7 +23,6 @@ export function DealsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCat = (searchParams.get("cat") ?? "all").toLowerCase();
 
-  const [secs, setSecs] = useState(18 * 3600 + 42 * 60 + 7);
   const [activeCat, setActiveCat] = useState(initialCat);
   const [sort, setSort] = useState<SortValue>("popular");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -47,19 +44,10 @@ export function DealsPage() {
   };
 
   useEffect(() => {
-    const id = setInterval(() => setSecs((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 3200);
     return () => clearTimeout(t);
   }, [toast]);
-
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
 
   const filtered = useMemo(() => {
     let list = DESTINATIONS.filter((d) => {
@@ -130,37 +118,6 @@ export function DealsPage() {
         </div>
       </div>
 
-      {/* COUNTDOWN */}
-      <div className="countdown-strip">
-        <div className="countdown-inner">
-          <div className="countdown-left">
-            <div className="pulse-dot"></div>
-            <span className="countdown-label">Flash sale ends in</span>
-            <div className="timer-blocks">
-              <div className="t-block">
-                <strong>{pad(h)}</strong>
-                <small>hrs</small>
-              </div>
-              <span className="t-sep">:</span>
-              <div className="t-block">
-                <strong>{pad(m)}</strong>
-                <small>min</small>
-              </div>
-              <span className="t-sep">:</span>
-              <div className="t-block">
-                <strong>{pad(s)}</strong>
-                <small>sec</small>
-              </div>
-            </div>
-          </div>
-          <div className="countdown-right">
-            <span className="deal-tally">
-              Prices held until <strong>midnight</strong> tonight
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* CATEGORY TABS */}
       <div className="cat-tabs-bar">
         <div className="cat-tabs-inner">
@@ -196,12 +153,6 @@ export function DealsPage() {
             <span className="trust-icon">☎</span>
             <div>
               <strong>24/7 Support</strong>On-trip assistance always
-            </div>
-          </div>
-          <div className="trust-item">
-            <span className="trust-icon">⭐</span>
-            <div>
-              <strong>4.9 Trustpilot</strong>12,400+ happy travellers
             </div>
           </div>
           <div className="trust-item">

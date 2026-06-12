@@ -58,13 +58,7 @@ export function Footer() {
         </div>
         <div className="footer-base">
           <div className="footer-legal">
-            © 2025 Farland Holidays Ltd · Registered in England &amp; Wales No. 07432918
-          </div>
-          <div className="footer-trust-badges">
-            <span className="ftrust">Fully Protected 11842</span>
-            <span className="ftrust">AITO Member</span>
-            <span className="ftrust">★ 4.9 Trustpilot</span>
-            <span className="ftrust">Which? Recommended</span>
+            © {new Date().getFullYear()} Farland Holidays
           </div>
         </div>
       </div>

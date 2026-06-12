@@ -98,22 +98,12 @@
 .deals-inner .section-eyebrow{color:var(--gold)}
 .deals-inner .section-eyebrow::before{background:var(--gold)}
 .deals-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:48px;flex-wrap:wrap;gap:16px}
-.countdown-bar{display:flex;align-items:center;gap:10px;background:rgba(13,110,253,.12);border:1px solid rgba(13,110,253,.2);border-radius:var(--r-pill);padding:8px 16px}
-.countdown-bar span.label{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0;line-height:1}
-.countdown-timer{display:flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums}
-.time-block{display:flex;flex-direction:column;align-items:center;text-align:center}
-.time-block strong{display:block;font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--white);line-height:1}
-.time-block small{font-family:var(--font-body);font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.02em;line-height:1;margin-top:2px}
-.time-sep{font-family:var(--font-display);font-size:20px;color:rgba(255,255,255,.25);line-height:1;align-self:center;margin-top:0}
 .deals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:900px){.deals-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.deals-grid{grid-template-columns:1fr}}
 @media(max-width:520px){
   .deals-header{align-items:flex-start}
   .deals-header>div{width:100%}
-  .countdown-bar{width:100%;justify-content:center;flex-wrap:wrap;gap:6px}
-  .countdown-bar span.label{width:100%;text-align:center}
-  .countdown-timer{justify-content:center}
 }
 
 .deal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);overflow:hidden;transition:all .4s var(--ease);cursor:pointer}
@@ -159,44 +149,12 @@
 .why-feature-text h4{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px}
 .why-feature-text p{font-family:var(--font-body);font-size:12px;color:var(--stone-dark);line-height:1.6}
 
-/* ─── TESTIMONIALS ─── */
-#testimonials{padding:clamp(72px,8vw,112px) clamp(20px,5vw,60px);background:var(--ivory-mid)}
-.testimonials-inner{max-width:1280px;margin:0 auto}
-.testimonials-header{text-align:center;margin-bottom:56px}
-.testimonials-header .section-eyebrow{justify-content:center}
-.testimonials-header .section-eyebrow::before{display:none}
-.testimonials-header .section-eyebrow::after{content:'';width:28px;height:1px;background:var(--gold)}
-.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-@media(max-width:900px){.testi-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.testi-grid{grid-template-columns:1fr}}
-
-.testi-card{background:var(--white);border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow-sm);transition:all .4s var(--ease);position:relative}
-.testi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.testi-card.highlight{background:var(--navy-grad);border:1px solid rgba(13,110,253,.2)}
-.testi-quote-mark{font-family:var(--font-display);font-size:64px;font-weight:700;line-height:.7;color:var(--gold-pale);position:absolute;top:18px;right:22px}
-.testi-card.highlight .testi-quote-mark{color:rgba(13,110,253,.15)}
-.testi-stars{display:flex;gap:3px;margin-bottom:14px}
-.testi-star{color:var(--gold);font-size:13px}
-.testi-text{font-family:var(--font-display);font-size:14px;font-weight:400;font-style:italic;color:var(--navy);line-height:1.5;margin-bottom:20px}
-.testi-card.highlight .testi-text{color:var(--white)}
-.testi-dest-tag{display:inline-flex;align-items:center;gap:6px;background:var(--gold-pale);border-radius:var(--r-pill);padding:4px 12px;margin-bottom:18px}
-.testi-card.highlight .testi-dest-tag{background:rgba(13,110,253,.15)}
-.testi-dest-tag span{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone-dark)}
-.testi-card.highlight .testi-dest-tag span{color:var(--gold-light)}
-.testi-author{display:flex;align-items:center;gap:12px;border-top:1px solid var(--ivory-mid);padding-top:16px}
-.testi-card.highlight .testi-author{border-top-color:rgba(255,255,255,.08)}
-.testi-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-pale)}
-.testi-author-info h5{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--navy)}
-.testi-card.highlight .testi-author-info h5{color:var(--white)}
-.testi-author-info small{font-family:var(--font-body);font-size:11px;color:var(--stone-dark)}
-.testi-card.highlight .testi-author-info small{color:rgba(255,255,255,.4)}
-.testi-platform{position:absolute;bottom:28px;right:28px;font-family:var(--font-body);font-size:10px;font-weight:600;color:var(--stone);letter-spacing:.02em}
-.testi-card.highlight .testi-platform{color:rgba(255,255,255,.2)}
-.trustpilot-bar{margin-top:48px;display:flex;justify-content:center;align-items:center;gap:40px;flex-wrap:wrap;padding:28px;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+/* .trust-item base styles: no longer used on the homepage itself, but the
+   Deals/Umrah trust strips inherit font-family/text-align from these via the
+   global cascade — remove only together with a check of DealsPage.css. */
 .trust-item{text-align:center}
 .trust-item strong{display:block;font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--navy)}
 .trust-item span{font-family:var(--font-body);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--stone-dark)}
-.trust-divider{width:1px;height:40px;background:var(--ivory-mid)}
 
 /* ─── CTA BANNER ─── */
 #cta-banner{position:relative;overflow:hidden}
