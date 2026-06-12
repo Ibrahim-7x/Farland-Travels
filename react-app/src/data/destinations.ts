@@ -52,8 +52,8 @@ export const DESTINATIONS: Destination[] = [
     subtitle: "Twin Capitals & Tropical Beaches",
     region: "Southeast Asia",
     regionLabel: "Singapore · Indonesia",
-    image: "/singapour-bali/singapore-bali-exc.jpg",
-    heroImage: "/singapour-bali/singapore-bali-exc.jpg",
+    image: "/singapour-bali/singapore-bali-exc.webp",
+    heroImage: "/singapour-bali/singapore-bali-exc.webp",
     description:
       "Begin with four sparkling nights in Singapore — Marina Bay Sands SkyPark and Gardens by the Bay included — then unwind for seven nights in Seminyak, Bali with private snorkelling and Ubud excursions.",
     tagline: "City lights meet island stillness — 11 nights in two of Asia's finest.",
