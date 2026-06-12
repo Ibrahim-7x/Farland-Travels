@@ -17,6 +17,10 @@ function parsePrice(s: string): number {
   return Number(s.replace(/[^0-9.]/g, "")) || 0;
 }
 
+const cheapestDeal = DESTINATIONS.reduce((lo, d) =>
+  parsePrice(d.fromPrice) < parsePrice(lo.fromPrice) ? d : lo
+);
+
 type SortValue = "popular" | "price-asc" | "price-desc" | "alpha";
 
 export function DealsPage() {
@@ -91,7 +95,7 @@ export function DealsPage() {
           </div>
           <div className="dp-hero-eyebrow">Live published prices</div>
           <h1 className="dp-hero-title">
-            Four Curated Journeys,
+            Curated Journeys,
             <br />
             <em>Fully Priced</em>
           </h1>
@@ -105,7 +109,8 @@ export function DealsPage() {
               <strong>{DESTINATIONS.length}</strong> curated packages
             </div>
             <div className="dp-hero-meta-item">
-              <div className="dp-hero-meta-dot"></div>From <strong>AUD $2,088</strong>
+              <div className="dp-hero-meta-dot"></div>From{" "}
+              <strong>{cheapestDeal.fromPrice}</strong>
             </div>
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
@@ -202,6 +207,31 @@ export function DealsPage() {
               </div>
             </div>
           </div>
+
+          {filtered.length === 0 && (
+            <div className="deals-empty">
+              <div className="deals-empty-icon" aria-hidden="true">
+                🧭
+              </div>
+              <h2>No live deals in this category yet</h2>
+              <p>
+                Tell us what you're after and our specialists will craft a
+                journey around it — or browse everything we currently run.
+              </p>
+              <div className="deals-empty-actions">
+                <Link to="/contact#inquiry-section" className="btn btn-gold">
+                  Tell us what you're after →
+                </Link>
+                <button
+                  type="button"
+                  className="btn btn-outline-navy"
+                  onClick={() => selectCategory("all")}
+                >
+                  View all deals
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className={`dp-deals-grid ${view === "list" ? "lv" : ""}`}>
             {filtered.map((d) => {

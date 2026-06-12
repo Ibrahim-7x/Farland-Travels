@@ -237,9 +237,7 @@ export function SearchResultsPage() {
                 <span className="sr-price-eyebrow">Price summary</span>
                 <h3>{destination.name}</h3>
                 <span className="sr-price-when">
-                  {monthFull
-                    ? `${monthFull}${isMakkah ? "" : " 2025"}`
-                    : "Any departure month"}
+                  {monthFull || "Any departure month"}
                 </span>
               </div>
               <div className="sr-price-body">

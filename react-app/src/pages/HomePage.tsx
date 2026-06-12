@@ -27,7 +27,9 @@ export function HomePage() {
         <div className="hero-content">
           <div className="hero-badge">
             <div className="hero-dot"></div>
-            <span>New: 4 curated journeys for 2025</span>
+            <span>
+              {DESTINATIONS.length} curated journeys · fully costed
+            </span>
           </div>
           <h1 className="hero-headline">
             The World's Most
@@ -70,7 +72,7 @@ export function HomePage() {
             <div>
               <h2 className="section-title">Curated Destinations</h2>
               <p className="section-sub">
-                Four hand-selected journeys, each fully costed and ready to book.
+                Hand-selected journeys, each fully costed and ready to book.
               </p>
             </div>
             <Link to="/destinations" className="btn-text-gold">
@@ -189,7 +191,7 @@ export function HomePage() {
             <div>
               <h2 className="section-title">Exceptional Deals</h2>
               <p className="section-sub" style={{ color: "rgba(255,255,255,.45)" }}>
-                Live published prices on our four signature journeys.
+                Live published prices on our signature journeys.
               </p>
             </div>
           </div>
