@@ -8,6 +8,7 @@ import { DealsPage } from "./pages/DealsPage";
 import { UmrahPage } from "./pages/UmrahPage";
 import { ContactPage } from "./pages/ContactPage";
 import { SearchResultsPage } from "./pages/SearchResultsPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/umrah" element={<UmrahPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/search-results" element={<SearchResultsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

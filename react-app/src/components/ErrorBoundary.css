@@ -1,0 +1,6 @@
+/* Self-contained: shown without the site nav/footer when rendering fails. */
+.eb-fallback{min-height:100vh;background:var(--navy-grad);display:flex;align-items:center;justify-content:center;text-align:center;padding:40px clamp(20px,5vw,60px)}
+.eb-content{max-width:520px}
+.eb-eyebrow{font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.eb-title{font-family:var(--font-display);font-size:clamp(30px,5vw,44px);font-weight:300;color:var(--white);line-height:1.1;margin-bottom:14px}
+.eb-sub{font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:32px}
