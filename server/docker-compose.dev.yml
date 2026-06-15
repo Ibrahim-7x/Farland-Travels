@@ -1,0 +1,23 @@
+## Local development MySQL only — production uses the cPanel-provided MySQL.
+##   docker compose -f docker-compose.dev.yml up -d
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: farland_root
+      MYSQL_DATABASE: farland
+      MYSQL_USER: farland
+      MYSQL_PASSWORD: farland_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - farland_mysql:/var/lib/mysql
+      - ./docker/mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pfarland_root"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+volumes:
+  farland_mysql:
