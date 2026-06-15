@@ -1,7 +1,18 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { UMRAH_CITIES } from "../data/umrah";
+import {
+  useSiteSettings,
+  telHref,
+  whatsappHref,
+} from "../contexts/siteSettings";
 import "./ContactPage.css";
+
+// Departure cities are static (not DB-managed); package details live on /umrah.
+const UMRAH_CITY_OPTIONS = [
+  { id: "perth", city: "Perth" },
+  { id: "melbourne", city: "Melbourne" },
+  { id: "sydney", city: "Sydney" },
+];
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -63,10 +74,21 @@ export function ContactPage() {
   const [consent, setConsent] = useState(false);
   const [activeChannel, setActiveChannel] = useState("inquiry-section");
 
-  const selectedCityPkgs = UMRAH_CITIES.find((c) => c.id === umrahCity)?.packages ?? [];
-  const umrahAvailableDates = [
-    ...new Set(selectedCityPkgs.flatMap((p) => p.departureDates ?? [])),
-  ];
+  const { businessName, contactPhone, contactEmail, contactWhatsapp } =
+    useSiteSettings();
+  const phoneLink = telHref(contactPhone);
+  const waChat = whatsappHref(
+    contactWhatsapp,
+    `Hi ${businessName || "Farland"}, I'm interested in planning a trip.`,
+  );
+  const waQuote = whatsappHref(contactWhatsapp, "Hi! I'd like a quick quote.");
+
+  // Honeypot + submission state for the enquiry POST.
+  const [website, setWebsite] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const umrahCityLabel =
+    UMRAH_CITY_OPTIONS.find((c) => c.id === umrahCity)?.city ?? "";
 
   const today = useMemo(() => new Date(), []);
   const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
@@ -96,12 +118,53 @@ export function ContactPage() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const submitInquiry = () => {
+  const submitInquiry = async () => {
     if (!consent) {
-      alert("Please confirm consent to continue.");
+      setSubmitError("Please confirm consent to continue.");
       return;
     }
-    setStep(4);
+    setSubmitError("");
+    setSubmitting(true);
+    const isUmrah = destTab === "umrah";
+    const payload = isUmrah
+      ? {
+          departureCity: umrahCityLabel,
+          tier: umrahTier,
+          roomType: umrahRoomType,
+          departureDate: umrahDeparture,
+          pilgrims,
+          message,
+        }
+      : {
+          destinations: [...destinations],
+          otherDestination: otherDest,
+          budgetAUD: budget,
+          tripTypes: [...tripTypes],
+          message,
+        };
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: isUmrah ? "umrah" : "holiday",
+          name: `${first} ${last}`.trim(),
+          email,
+          phone,
+          payload,
+          source_page: "/contact",
+          website, // honeypot — must stay empty
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setStep(4);
+    } catch {
+      setSubmitError(
+        "Sorry, something went wrong sending your enquiry. Please try again, or reach us by phone or email.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -141,7 +204,7 @@ export function ContactPage() {
               <strong>Free</strong> consultation
             </div>
             <div className="cp-hero-badge">
-              <strong>Protected</strong>
+              <strong>Tailored</strong> itineraries
             </div>
           </div>
         </div>
@@ -186,6 +249,23 @@ export function ContactPage() {
             </div>
 
             <div className="form-card-body">
+              {/* Honeypot — hidden from real users; bots that fill it are rejected. */}
+              <input
+                type="text"
+                name="website"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: "-9999px",
+                  width: 1,
+                  height: 1,
+                  opacity: 0,
+                }}
+              />
               <div className="step-indicator">
                 <div className={`step ${step === 1 ? "active" : step > 1 ? "done" : ""}`}>
                   <div className="step-dot">{step > 1 ? "✓" : 1}</div>
@@ -271,7 +351,7 @@ export function ContactPage() {
                           className="form-input"
                           id="inq-phone"
                           type="tel"
-                          placeholder="+44 7700 900000"
+                          placeholder="+61 400 000 000"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                         />
@@ -398,29 +478,18 @@ export function ContactPage() {
                         Select your departure city for Umrah — September 2026:
                       </p>
                       <div className="umrah-city-grid">
-                        {UMRAH_CITIES.map((city) => {
-                          const fromPkg = city.packages.reduce(
-                            (lo, p) => (p.price < lo.price ? p : lo),
-                            city.packages[0],
-                          );
-                          return (
-                            <div
-                              key={city.id}
-                              className={`umrah-city-card ${umrahCity === city.id ? "selected" : ""}`}
-                              onClick={() => setUmrahCity(city.id)}
-                            >
-                              <div className="ucc-check">✓</div>
-                              <span className="ucc-icon">🕋</span>
-                              <div className="ucc-name">{city.city}</div>
-                              <div className="ucc-count">
-                                {city.packages.length} packages
-                              </div>
-                              <div className="ucc-price">
-                                From {fromPkg.priceDisplay}
-                              </div>
-                            </div>
-                          );
-                        })}
+                        {UMRAH_CITY_OPTIONS.map((city) => (
+                          <div
+                            key={city.id}
+                            className={`umrah-city-card ${umrahCity === city.id ? "selected" : ""}`}
+                            onClick={() => setUmrahCity(city.id)}
+                          >
+                            <div className="ucc-check">✓</div>
+                            <span className="ucc-icon">🕋</span>
+                            <div className="ucc-name">{city.city}</div>
+                            <div className="ucc-count">September 2026</div>
+                          </div>
+                        ))}
                       </div>
                     </>
                   )}
@@ -455,9 +524,7 @@ export function ContactPage() {
                     <span>🕋</span>
                     <div>
                       <div>Departure city</div>
-                      <strong>
-                        {UMRAH_CITIES.find((c) => c.id === umrahCity)?.city}
-                      </strong>
+                      <strong>{umrahCityLabel}</strong>
                     </div>
                     <button type="button" onClick={() => setStep(2)}>
                       Change
@@ -506,35 +573,25 @@ export function ContactPage() {
                     </div>
                   </div>
 
-                  {/* Departure dates from selected city */}
-                  {umrahAvailableDates.length > 0 && (
-                    <div className="form-group">
-                      <label className="form-label">Preferred departure date</label>
-                      <div className="type-chips">
-                        {umrahAvailableDates.map((date) => (
-                          <div
-                            key={date}
-                            className={`type-chip ${umrahDeparture === date ? "on" : ""}`}
-                            onClick={() =>
-                              setUmrahDeparture(umrahDeparture === date ? "" : date)
-                            }
-                          >
-                            📅 {date}
-                          </div>
-                        ))}
-                        <div
-                          className={`type-chip ${umrahDeparture === "flexible" ? "on" : ""}`}
-                          onClick={() =>
-                            setUmrahDeparture(
-                              umrahDeparture === "flexible" ? "" : "flexible",
-                            )
-                          }
-                        >
-                          Flexible
-                        </div>
-                      </div>
+                  {/* Preferred departure date (optional) */}
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="inq-umrah-date">
+                      Preferred departure date{" "}
+                      <span style={{ color: "var(--stone-dark)", fontWeight: 400 }}>
+                        (optional)
+                      </span>
+                    </label>
+                    <div className="input-wrap">
+                      <span className="input-icon">📅</span>
+                      <input
+                        className="form-input"
+                        id="inq-umrah-date"
+                        type="date"
+                        value={umrahDeparture}
+                        onChange={(e) => setUmrahDeparture(e.target.value)}
+                      />
                     </div>
-                  )}
+                  </div>
 
                   {/* Pilgrims + Duration */}
                   <div className="form-row-2">
@@ -597,11 +654,16 @@ export function ContactPage() {
                     <label htmlFor="inq-consent-u">
                       I agree to be contacted by Farland Holidays regarding my enquiry
                       and confirm I have read the{" "}
-                      <a href="#privacy">Privacy Policy</a>. I can unsubscribe at any
+                      <Link to="/privacy">Privacy Policy</Link>. I can unsubscribe at any
                       time.
                     </label>
                   </div>
 
+                  {submitError && (
+                    <div className="field-msg err show" role="alert">
+                      {submitError}
+                    </div>
+                  )}
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       type="button"
@@ -615,15 +677,16 @@ export function ContactPage() {
                       type="button"
                       className="btn-submit btn-gold-full"
                       onClick={submitInquiry}
+                      disabled={submitting}
                     >
-                      🕋 Send Umrah Enquiry →
+                      {submitting ? "Sending…" : "🕋 Send Umrah Enquiry →"}
                     </button>
                   </div>
                   <div className="trust-row">
                     <div className="trust-item">🔒 <span>Secure &amp; confidential</span></div>
                     <div className="trust-item">⚡ <span>Reply in 2 hours</span></div>
                     <div className="trust-item">💰 <span>No booking fees</span></div>
-                    <div className="trust-item">🛡 <span>Fully protected</span></div>
+                    <div className="trust-item">🛡 <span>Dedicated specialists</span></div>
                   </div>
                 </div>
               )}
@@ -685,7 +748,7 @@ export function ContactPage() {
                     <label className="form-label">
                       Budget per person —{" "}
                       <span style={{ color: "var(--navy)", fontWeight: 600 }}>
-                        £{budget.toLocaleString()}
+                        A${budget.toLocaleString()}
                       </span>
                     </label>
                     <input
@@ -706,8 +769,8 @@ export function ContactPage() {
                         marginTop: 6,
                       }}
                     >
-                      <span>£500</span>
-                      <span>£15,000+</span>
+                      <span>A$500</span>
+                      <span>A$15,000+</span>
                     </div>
                   </div>
                   <div className="form-group">
@@ -746,10 +809,15 @@ export function ContactPage() {
                     />
                     <label htmlFor="inq-consent">
                       I agree to be contacted by Farland Holidays regarding my enquiry
-                      and confirm I have read the <a href="#privacy">Privacy Policy</a>.
+                      and confirm I have read the <Link to="/privacy">Privacy Policy</Link>.
                       I can unsubscribe at any time.
                     </label>
                   </div>
+                  {submitError && (
+                    <div className="field-msg err show" role="alert">
+                      {submitError}
+                    </div>
+                  )}
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       type="button"
@@ -763,15 +831,16 @@ export function ContactPage() {
                       type="button"
                       className="btn-submit btn-gold-full"
                       onClick={submitInquiry}
+                      disabled={submitting}
                     >
-                      ✦ Send My Enquiry →
+                      {submitting ? "Sending…" : "✦ Send My Enquiry →"}
                     </button>
                   </div>
                   <div className="trust-row">
                     <div className="trust-item">🔒 <span>Secure &amp; confidential</span></div>
                     <div className="trust-item">⚡ <span>Reply in 2 hours</span></div>
                     <div className="trust-item">💰 <span>No booking fees</span></div>
-                    <div className="trust-item">🛡 <span>Fully protected</span></div>
+                    <div className="trust-item">🛡 <span>Dedicated specialists</span></div>
                   </div>
                 </div>
               )}
@@ -802,38 +871,42 @@ export function ContactPage() {
                 <p>Choose how you'd like to get in touch</p>
               </div>
               <div className="contact-card-body">
-                <a href="tel:+448001234567" className="contact-channel">
+                <a href={phoneLink ?? undefined} className="contact-channel">
                   <div className="ch-icon phone">📞</div>
                   <div className="ch-text">
                     <span className="ch-label">Call us</span>
-                    <span className="ch-value">+44 800 123 4567</span>
+                    <span className="ch-value">{contactPhone || "—"}</span>
                     <span className="ch-sub">Mon–Fri 9am–7pm · Sat 9am–5pm</span>
                   </div>
                   <span className="ch-arrow">→</span>
                 </a>
-                <a href="mailto:hello@farlandholidays.com" className="contact-channel">
-                  <div className="ch-icon email">✉</div>
-                  <div className="ch-text">
-                    <span className="ch-label">Email us</span>
-                    <span className="ch-value">hello@farlandholidays.com</span>
-                    <span className="ch-sub">Reply within 2 working hours</span>
-                  </div>
-                  <span className="ch-arrow">→</span>
-                </a>
-                <a
-                  href="https://wa.me/44800123456?text=Hi%20Farland%20Holidays%2C%20I'm%20interested%20in%20planning%20a%20trip."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="contact-channel"
-                >
-                  <div className="ch-icon wa">💬</div>
-                  <div className="ch-text">
-                    <span className="ch-label">WhatsApp</span>
-                    <span className="ch-value">Message us instantly</span>
-                    <span className="ch-sub">Usually replies within minutes</span>
-                  </div>
-                  <span className="ch-arrow">→</span>
-                </a>
+                {contactEmail && (
+                  <a href={`mailto:${contactEmail}`} className="contact-channel">
+                    <div className="ch-icon email">✉</div>
+                    <div className="ch-text">
+                      <span className="ch-label">Email us</span>
+                      <span className="ch-value">{contactEmail}</span>
+                      <span className="ch-sub">Reply within 2 working hours</span>
+                    </div>
+                    <span className="ch-arrow">→</span>
+                  </a>
+                )}
+                {waChat && (
+                  <a
+                    href={waChat}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-channel"
+                  >
+                    <div className="ch-icon wa">💬</div>
+                    <div className="ch-text">
+                      <span className="ch-label">WhatsApp</span>
+                      <span className="ch-value">Message us instantly</span>
+                      <span className="ch-sub">Usually replies within minutes</span>
+                    </div>
+                    <span className="ch-arrow">→</span>
+                  </a>
+                )}
               </div>
             </div>
 
@@ -933,18 +1006,20 @@ export function ContactPage() {
 
               <div className="wa-btns">
                 <a
-                  href="https://wa.me/44800123456?text=Hi%20Farland%20Holidays!%20I'd%20love%20to%20plan%20a%20trip."
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={waChat ?? "#inquiry-section"}
+                  {...(waChat
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
                   className="btn-submit btn-gold-full"
                   style={{ maxWidth: 260, textDecoration: "none" }}
                 >
                   💬 Open WhatsApp Chat
                 </a>
                 <a
-                  href="https://wa.me/44800123456?text=Hi!%20I'd%20like%20a%20quick%20quote."
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={waQuote ?? "#inquiry-section"}
+                  {...(waQuote
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
                   className="btn-submit btn-outline-full"
                   style={{ maxWidth: 200, textDecoration: "none" }}
                 >
@@ -961,8 +1036,10 @@ export function ContactPage() {
                 }}
               >
                 WhatsApp number:{" "}
-                <strong style={{ color: "var(--navy)" }}>+44 800 123 4567</strong> ·
-                Mon–Sat 9am–7pm
+                <strong style={{ color: "var(--navy)" }}>
+                  {contactWhatsapp || "to be confirmed"}
+                </strong>{" "}
+                · Mon–Sat 9am–7pm
               </p>
             </div>
 
@@ -993,7 +1070,7 @@ export function ContactPage() {
                     <div className="chat-time">9:42</div>
                   </div>
                   <div className="chat-bubble sent">
-                    Around £3,500–£4,500 each.
+                    Around A$3,500–A$4,500 each.
                     <div className="chat-time">9:43</div>
                   </div>
                   <div className="chat-bubble received">

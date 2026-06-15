@@ -2,10 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DESTINATIONS } from "../data/destinations";
 import { SearchBar } from "../components/SearchBar";
+import { Testimonials } from "../components/Testimonials";
+import { useSiteSettings, telHref } from "../contexts/siteSettings";
 import "./HomePage.css";
 
 export function HomePage() {
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
+  const { contactPhone } = useSiteSettings();
+  const phoneLink = telHref(contactPhone);
 
   const toggleWish = (key: string) =>
     setWishlist((w) => ({ ...w, [key]: !w[key] }));
@@ -55,12 +59,12 @@ export function HomePage() {
         </div>
         <div className="hero-stats">
           <div className="hero-stat">
-            <strong>15+</strong>
-            <small>Years of expertise</small>
+            <strong>Expert</strong>
+            <small>team of specialists</small>
           </div>
           <div className="hero-stat">
-            <strong>12,000+</strong>
-            <small>Holidays crafted</small>
+            <strong>Tailored</strong>
+            <small>itineraries, every time</small>
           </div>
         </div>
       </section>
@@ -253,8 +257,8 @@ export function HomePage() {
                 />
               </div>
               <div className="why-badge">
-                <strong>15+</strong>
-                <span>Years crafting journeys</span>
+                <strong>Hands-on</strong>
+                <span>destination expertise</span>
               </div>
             </div>
             <div className="reveal reveal-delay-2">
@@ -298,8 +302,8 @@ export function HomePage() {
                 <div className="why-feature">
                   <div className="why-icon">🛡</div>
                   <div className="why-feature-text">
-                    <h4>Fully protected</h4>
-                    <p>Every penny is fully financially protected. Always.</p>
+                    <h4>Trusted service</h4>
+                    <p>Clear, honest pricing and a dedicated specialist from your first enquiry to your return home.</p>
                   </div>
                 </div>
                 <div className="why-feature">
@@ -307,16 +311,16 @@ export function HomePage() {
                   <div className="why-feature-text">
                     <h4>Responsible travel</h4>
                     <p>
-                      We offset carbon on every booking and partner with conservation-led
-                      lodges.
+                      We work with partners who care for the destinations and
+                      communities we visit.
                     </p>
                   </div>
                 </div>
                 <div className="why-feature">
                   <div className="why-icon">💰</div>
                   <div className="why-feature-text">
-                    <h4>Price match pledge</h4>
-                    <p>Find the same trip for less and we'll match it.</p>
+                    <h4>Competitive pricing</h4>
+                    <p>Fair, transparent pricing with no hidden booking fees.</p>
                   </div>
                 </div>
               </div>
@@ -324,6 +328,9 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* TESTIMONIALS — only renders when there are published reviews */}
+      <Testimonials />
 
       {/* CTA BANNER */}
       <section id="cta-banner">
@@ -347,17 +354,23 @@ export function HomePage() {
             </p>
             <div className="cta-features">
               <span className="cta-feature">No booking fees</span>
-              <span className="cta-feature">Price match guarantee</span>
+              <span className="cta-feature">Competitive pricing</span>
               <span className="cta-feature">Expert consultation included</span>
-              <span className="cta-feature">Fully protected</span>
+              <span className="cta-feature">Trusted service</span>
             </div>
             <div className="cta-btns">
               <Link to="/contact#inquiry-section" className="btn btn-gold">
                 Start planning your trip ↗
               </Link>
-              <a href="tel:+44800123456" className="btn btn-outline-white">
-                ☎ Call +44 800 123 456
-              </a>
+              {phoneLink ? (
+                <a href={phoneLink} className="btn btn-outline-white">
+                  ☎ Call {contactPhone}
+                </a>
+              ) : (
+                <Link to="/contact#inquiry-section" className="btn btn-outline-white">
+                  ☎ Call us
+                </Link>
+              )}
             </div>
           </div>
         </div>

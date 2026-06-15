@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useSiteSettings, telHref } from "../contexts/siteSettings";
 
 export function Footer() {
+  const { contactPhone, contactEmail, address } = useSiteSettings();
+  const phoneLink = telHref(contactPhone);
   return (
     <footer className="site-footer">
       <div className="footer-inner">
@@ -9,11 +12,35 @@ export function Footer() {
             <div className="footer-logo">
               Farland<span> Holidays</span>
             </div>
-            <div className="footer-tagline">Bespoke Luxury Travel Since 2008</div>
             <p className="footer-desc">
               Crafting extraordinary journeys for the world's most discerning travellers.
               Every trip, a story worth telling.
             </p>
+            {(contactPhone || contactEmail || address) && (
+              <ul
+                className="footer-contact"
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: "14px 0 0",
+                  display: "grid",
+                  gap: 6,
+                  fontSize: 13,
+                }}
+              >
+                {contactPhone && (
+                  <li>
+                    {phoneLink ? <a href={phoneLink}>{contactPhone}</a> : contactPhone}
+                  </li>
+                )}
+                {contactEmail && (
+                  <li>
+                    <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                  </li>
+                )}
+                {address && <li>{address}</li>}
+              </ul>
+            )}
             <div className="footer-socials">
               <div className="fsoc">in</div>
               <div className="fsoc">ig</div>
@@ -51,8 +78,8 @@ export function Footer() {
               <li><Link to="/contact">FAQs</Link></li>
               <li><Link to="/contact">How to book</Link></li>
               <li><Link to="/contact">Travel insurance</Link></li>
-              <li><Link to="/contact">Terms &amp; conditions</Link></li>
-              <li><Link to="/contact">Privacy policy</Link></li>
+              <li><Link to="/terms">Terms &amp; conditions</Link></li>
+              <li><Link to="/privacy">Privacy policy</Link></li>
             </ul>
           </div>
         </div>

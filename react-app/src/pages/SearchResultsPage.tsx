@@ -32,7 +32,7 @@ function parsePriceDisplay(priceDisplay: string): {
   currency: string;
   amount: number;
 } {
-  const symbol = priceDisplay.match(/[£$€]/)?.[0] ?? "";
+  const symbol = priceDisplay.match(/[$€]/)?.[0] ?? "";
   const numeric = parseAmount(priceDisplay);
   return { currency: symbol, amount: numeric };
 }
@@ -61,6 +61,15 @@ export function SearchResultsPage() {
   const [selectedPackageIndex, setSelectedPackageIndex] = useState<number>(1);
   const [editing, setEditing] = useState(false);
 
+  // Enquiry form state.
+  const [srName, setSrName] = useState("");
+  const [srEmail, setSrEmail] = useState("");
+  const [srMsg, setSrMsg] = useState("");
+  const [srWebsite, setSrWebsite] = useState(""); // honeypot
+  const [srStatus, setSrStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
+
   const monthlyPrice = useMemo(() => {
     if (!destination || !monthFull) return undefined;
     return getPriceForMonth(destination, monthFull);
@@ -85,6 +94,34 @@ export function SearchResultsPage() {
     0,
     3
   );
+
+  const submitSearchEnquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSrStatus("submitting");
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "quote",
+          name: srName,
+          email: srEmail,
+          payload: {
+            destination: destination.name,
+            month: monthFull,
+            persons,
+            message: srMsg,
+          },
+          source_page: "/search-results",
+          website: srWebsite, // honeypot — must stay empty
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSrStatus("success");
+    } catch {
+      setSrStatus("error");
+    }
+  };
 
   const summaryParts = [
     destination.name,
@@ -118,7 +155,7 @@ export function SearchResultsPage() {
           <div className="sr-price-divider" />
           <div className="sr-price-total">
             <span>Total Estimate</span>
-            <strong>{formatCurrency(total, currency || "£")}</strong>
+            <strong>{formatCurrency(total, currency || "A$")}</strong>
           </div>
           <div className="sr-price-note">{pkg.name} · {pkg.duration}</div>
         </>
@@ -273,40 +310,99 @@ export function SearchResultsPage() {
                 within 2 working hours{priceUnavailable ? " with a custom price for your dates" : ""}.
               </p>
             </div>
-            <form
-              className="sr-enquire-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thanks — a specialist will be in touch shortly.");
-              }}
-            >
-              <div className="form-row-2">
-                <div className="form-group">
-                  <label className="form-label" htmlFor="sr-name">Name</label>
-                  <input className="form-input" id="sr-name" type="text" placeholder="Full name" required />
+            <form className="sr-enquire-form" onSubmit={submitSearchEnquiry}>
+              {srStatus === "success" ? (
+                <div role="status" style={{ textAlign: "center", padding: "8px 0" }}>
+                  <div style={{ fontSize: 36 }}>✅</div>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      color: "var(--navy)",
+                      margin: "8px 0 4px",
+                    }}
+                  >
+                    Thank you!
+                  </h3>
+                  <p style={{ fontFamily: "var(--font-body)", color: "var(--stone-dark)" }}>
+                    A specialist will be in touch shortly.
+                  </p>
                 </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="sr-email">Email</label>
-                  <input className="form-input" id="sr-email" type="email" placeholder="your@email.com" required />
-                </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="sr-msg">Message</label>
-                <textarea
-                  className="form-input"
-                  id="sr-msg"
-                  rows={3}
-                  placeholder={`Tell us about your ${destination.name} trip…`}
-                  style={{ resize: "vertical" }}
-                />
-              </div>
-              <button
-                type="submit"
-                className="btn btn-gold"
-                style={{ justifyContent: "center", width: "100%", padding: 14 }}
-              >
-                Send enquiry ↗
-              </button>
+              ) : (
+                <>
+                  {/* Honeypot — hidden from real users. */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={srWebsite}
+                    onChange={(e) => setSrWebsite(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      left: "-9999px",
+                      width: 1,
+                      height: 1,
+                      opacity: 0,
+                    }}
+                  />
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="sr-name">Name</label>
+                      <input
+                        className="form-input"
+                        id="sr-name"
+                        type="text"
+                        placeholder="Full name"
+                        required
+                        value={srName}
+                        onChange={(e) => setSrName(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="sr-email">Email</label>
+                      <input
+                        className="form-input"
+                        id="sr-email"
+                        type="email"
+                        placeholder="your@email.com"
+                        required
+                        value={srEmail}
+                        onChange={(e) => setSrEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="sr-msg">Message</label>
+                    <textarea
+                      className="form-input"
+                      id="sr-msg"
+                      rows={3}
+                      placeholder={`Tell us about your ${destination.name} trip…`}
+                      style={{ resize: "vertical" }}
+                      value={srMsg}
+                      onChange={(e) => setSrMsg(e.target.value)}
+                    />
+                  </div>
+                  {srStatus === "error" && (
+                    <div
+                      role="alert"
+                      style={{ color: "#c0392b", fontSize: 13, margin: "0 0 10px" }}
+                    >
+                      Sorry, something went wrong. Please try again, or contact us
+                      directly.
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    className="btn btn-gold"
+                    style={{ justifyContent: "center", width: "100%", padding: 14 }}
+                    disabled={srStatus === "submitting"}
+                  >
+                    {srStatus === "submitting" ? "Sending…" : "Send enquiry ↗"}
+                  </button>
+                </>
+              )}
             </form>
           </div>
         </section>

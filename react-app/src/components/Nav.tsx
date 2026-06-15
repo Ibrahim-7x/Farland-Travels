@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useScrollSolid } from "../hooks/useScrollSolid";
 import { DESTINATIONS } from "../data/destinations";
-import { UMRAH_CITIES } from "../data/umrah";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? "active" : undefined;
@@ -80,6 +79,16 @@ const DEAL_CATEGORY_CHIPS: FilterPill[] = [
   { label: "Family", to: "/deals?cat=family", emoji: "👨‍👩‍👧" },
   { label: "Honeymoon", to: "/deals?cat=honeymoon", emoji: "💍" },
   { label: "Wellness", to: "/deals?cat=wellness", emoji: "🧘" },
+];
+
+/**
+ * Umrah departure cities — names are static (cities are not DB-managed).
+ * Live package counts / prices live on /umrah, fetched from the API.
+ */
+const UMRAH_CITY_LINKS: { id: string; city: string }[] = [
+  { id: "perth", city: "Perth" },
+  { id: "melbourne", city: "Melbourne" },
+  { id: "sydney", city: "Sydney" },
 ];
 
 function dealDuration(d: (typeof DESTINATIONS)[number]): string {
@@ -278,7 +287,7 @@ export function Nav() {
               View all deals →
             </Link>
             <span className="mega-footer-meta">
-              Fully protected · transparent pricing · no booking fees
+              Transparent pricing · no booking fees
             </span>
           </div>
         </div>
@@ -321,14 +330,7 @@ export function Nav() {
 
           {/* City summary cards */}
           <div className="umrah-mega-cities">
-            {UMRAH_CITIES.map((city) => {
-              const fromPkg = city.packages.reduce(
-                (lo, p) => (p.price < lo.price ? p : lo),
-                city.packages[0],
-              );
-              const tiers = [
-                ...new Set(city.packages.flatMap((p) => (p.tier ? [p.tier] : []))),
-              ];
+            {UMRAH_CITY_LINKS.map((city) => {
               const to = `/umrah#${city.id}`;
               return (
                 <a
@@ -338,22 +340,6 @@ export function Nav() {
                   onClick={(e) => handleNav(e, to)}
                 >
                   <div className="umrah-mega-city-name">{city.city}</div>
-                  <div className="umrah-mega-city-count">
-                    {city.packages.length} packages · September
-                  </div>
-                  <div className="umrah-mega-city-price">
-                    From {fromPkg.priceDisplay}
-                  </div>
-                  <div className="umrah-mega-city-tiers">
-                    {tiers.map((tier) => (
-                      <span
-                        key={tier}
-                        className={`umrah-mega-tier umrah-tier-${tier.toLowerCase()}`}
-                      >
-                        {tier}
-                      </span>
-                    ))}
-                  </div>
                   <span className="umrah-mega-city-link">
                     Browse {city.city} →
                   </span>

@@ -39,7 +39,7 @@ export function AboutPage() {
           <div className="section-eyebrow">Who We Are</div>
           <h2 className="section-title">A Travel Studio Built On Trust</h2>
           <p className="section-sub">
-            We started Farland in 2008 to build the kind of travel company we wished
+            We started Farland to build the kind of travel company we wished
             existed. A partner who listens carefully, designs intelligently, and stays by
             your side from the first call to your return home.
           </p>
@@ -58,16 +58,16 @@ export function AboutPage() {
               </p>
               <div className="story-stats">
                 <div className="stat-tile">
-                  <strong>40+</strong>
-                  <span>Countries</span>
+                  <strong>Worldwide</strong>
+                  <span>Destinations</span>
                 </div>
                 <div className="stat-tile">
-                  <strong>1,200+</strong>
+                  <strong>Memorable</strong>
                   <span>Journeys</span>
                 </div>
                 <div className="stat-tile">
-                  <strong>4.9/5</strong>
-                  <span>Avg Rating</span>
+                  <strong>Highly rated</strong>
+                  <span>Service</span>
                 </div>
               </div>
             </div>
@@ -124,19 +124,18 @@ export function AboutPage() {
             </div>
             <div className="value-card">
               <div className="value-icon">04</div>
-              <h4>Financially Protected</h4>
+              <h4>Dedicated Support</h4>
               <p>
-                Fully bonded. Every penny you pay is safeguarded from
-                deposit to return flight, so you can plan with complete confidence.
+                From your first enquiry to your return home, a real specialist
+                looks after the details of your trip.
               </p>
             </div>
             <div className="value-card">
               <div className="value-icon">05</div>
               <h4>Responsible Travel</h4>
               <p>
-                We offset carbon on every booking, partner with conservation-led
-                lodges, and prioritise local employment — because the places we love
-                deserve to be looked after.
+                We choose partners who respect local communities and the
+                places we love, so they are looked after for the future.
               </p>
             </div>
             <div className="value-card">
@@ -152,52 +151,24 @@ export function AboutPage() {
         </div>
       </section>
 
-      {/* TIMELINE */}
-      <section className="about-section reveal">
-        <div className="about-container">
-          <div className="section-eyebrow">Our Journey</div>
-          <h2 className="section-title">Milestones That Shaped Farland</h2>
-          <div className="timeline">
-            <div className="timeline-item">
-              <div className="timeline-year">2013</div>
-              <div className="timeline-text">
-                Farland started it services in United Kingdome.
-              </div>
-            </div>
-            <div className="timeline-item">
-              <div className="timeline-year">2024</div>
-              <div className="timeline-text">
-                Farland joined the USA market.
-              </div>
-            </div>
-            <div className="timeline-item">
-              <div className="timeline-year">2025</div>
-              <div className="timeline-text">
-                Farland successfully expanded its operations in UAE.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* STATS BAND */}
       <section className="stats-band reveal">
         <div className="stats-inner">
           <div className="stats-card">
-            <strong>98%</strong>
-            <span>Repeat Clients</span>
+            <strong>Trusted</strong>
+            <span>by repeat clients</span>
           </div>
           <div className="stats-card">
             <strong>24/7</strong>
-            <span>Trip Support</span>
+            <span>Trip support</span>
           </div>
           <div className="stats-card">
-            <strong>120</strong>
-            <span>Hotel Partners</span>
+            <strong>Hand-picked</strong>
+            <span>hotel partners</span>
           </div>
           <div className="stats-card">
-            <strong>8</strong>
-            <span>Senior Specialists</span>
+            <strong>Senior</strong>
+            <span>travel specialists</span>
           </div>
         </div>
       </section>

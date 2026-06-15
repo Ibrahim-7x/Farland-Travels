@@ -9,6 +9,18 @@ export function DestinationDetailPage() {
   const destination = getDestination(slug);
   const [stickyVisible, setStickyVisible] = useState(false);
 
+  // Enquiry form state.
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [month, setMonth] = useState("");
+  const [travellers, setTravellers] = useState("2 adults");
+  const [requests, setRequests] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot
+  const [ddStatus, setDdStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
+
   useEffect(() => {
     const onScroll = () => {
       const hero = document.getElementById("dd-hero");
@@ -41,6 +53,30 @@ export function DestinationDetailPage() {
   }
 
   const related = DESTINATIONS.filter((d) => d.slug !== destination.slug).slice(0, 3);
+
+  const submitEnquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDdStatus("submitting");
+    try {
+      const res = await fetch("/api/enquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "quote",
+          name,
+          email,
+          phone,
+          payload: { destination: destination.name, month, travellers, requests },
+          source_page: `/destinations/${destination.slug}`,
+          website, // honeypot — must stay empty
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setDdStatus("success");
+    } catch {
+      setDdStatus("error");
+    }
+  };
 
   return (
     <>
@@ -202,13 +238,7 @@ export function DestinationDetailPage() {
 
           {/* INQUIRY SIDEBAR */}
           <div id="inquiry">
-            <form
-              className="inquiry-box"
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thanks — our specialist will reply within 2 working hours.");
-              }}
-            >
+            <form className="inquiry-box" onSubmit={submitEnquiry}>
               <div className="inquiry-header">
                 <div className="inquiry-header-price">
                   <small>Tailor-made packages from</small>
@@ -216,103 +246,181 @@ export function DestinationDetailPage() {
                 </div>
               </div>
               <div className="inquiry-body">
-                <div className="form-group">
-                  <label className="form-label" htmlFor="dd-name">Your name</label>
-                  <input className="form-input" id="dd-name" type="text" placeholder="Full name" />
-                </div>
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="dd-email">Email</label>
-                    <input
-                      className="form-input"
-                      id="dd-email"
-                      type="email"
-                      placeholder="your@email.com"
-                    />
+                {ddStatus === "success" ? (
+                  <div role="status" style={{ textAlign: "center", padding: "24px 8px" }}>
+                    <div style={{ fontSize: 40 }}>✅</div>
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        color: "var(--navy)",
+                        margin: "10px 0 6px",
+                      }}
+                    >
+                      Enquiry sent!
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-body)",
+                        color: "var(--stone-dark)",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      Thank you — our specialist will reply within 2 working hours.
+                    </p>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="dd-phone">Phone</label>
+                ) : (
+                  <>
+                    {/* Honeypot — hidden from real users. */}
                     <input
-                      className="form-input"
-                      id="dd-phone"
-                      type="tel"
-                      placeholder="+44..."
+                      type="text"
+                      name="website"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        left: "-9999px",
+                        width: 1,
+                        height: 1,
+                        opacity: 0,
+                      }}
                     />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="dd-month">Preferred month</label>
-                  <select className="form-input" id="dd-month" defaultValue="">
-                    <option value="" disabled>
-                      Select a departure month
-                    </option>
-                    {destination.pricing?.map((p) => (
-                      <option key={p.month}>{p.month} — {p.display}</option>
-                    ))}
-                    {destination.packages?.map((p) => (
-                      <option key={p.id}>September — {p.name} ({p.priceDisplay})</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="dd-trav">Travellers</label>
-                  <select className="form-input" id="dd-trav" defaultValue="2 adults">
-                    <option>2 adults</option>
-                    <option>1 adult</option>
-                    <option>2 adults + children</option>
-                    <option>Family (4+)</option>
-                    <option>Group (6+)</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label" htmlFor="dd-req">Special requests</label>
-                  <textarea
-                    className="form-input"
-                    id="dd-req"
-                    rows={3}
-                    placeholder="Honeymoon, dietary needs, accessibility, etc."
-                    style={{ resize: "vertical" }}
-                  ></textarea>
-                </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="dd-name">Your name</label>
+                      <input
+                        className="form-input"
+                        id="dd-name"
+                        type="text"
+                        placeholder="Full name"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-row-2">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="dd-email">Email</label>
+                        <input
+                          className="form-input"
+                          id="dd-email"
+                          type="email"
+                          placeholder="your@email.com"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="dd-phone">Phone</label>
+                        <input
+                          className="form-input"
+                          id="dd-phone"
+                          type="tel"
+                          placeholder="+61..."
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="dd-month">Preferred month</label>
+                      <select
+                        className="form-input"
+                        id="dd-month"
+                        value={month}
+                        onChange={(e) => setMonth(e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Select a departure month
+                        </option>
+                        {destination.pricing?.map((p) => (
+                          <option key={p.month}>{p.month} — {p.display}</option>
+                        ))}
+                        {destination.packages?.map((p) => (
+                          <option key={p.id}>September — {p.name} ({p.priceDisplay})</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="dd-trav">Travellers</label>
+                      <select
+                        className="form-input"
+                        id="dd-trav"
+                        value={travellers}
+                        onChange={(e) => setTravellers(e.target.value)}
+                      >
+                        <option>2 adults</option>
+                        <option>1 adult</option>
+                        <option>2 adults + children</option>
+                        <option>Family (4+)</option>
+                        <option>Group (6+)</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="dd-req">Special requests</label>
+                      <textarea
+                        className="form-input"
+                        id="dd-req"
+                        rows={3}
+                        placeholder="Honeymoon, dietary needs, accessibility, etc."
+                        style={{ resize: "vertical" }}
+                        value={requests}
+                        onChange={(e) => setRequests(e.target.value)}
+                      ></textarea>
+                    </div>
 
-                <div className="inquiry-divider"></div>
-                <div className="inquiry-includes">
-                  <div className="inc-item">No booking fees charged</div>
-                  <div className="inc-item">Expert consultation included</div>
-                  <div className="inc-item">{destination.transfersIncluded}</div>
-                  <div className="inc-item">Price match guarantee</div>
-                </div>
+                    <div className="inquiry-divider"></div>
+                    <div className="inquiry-includes">
+                      <div className="inc-item">No booking fees charged</div>
+                      <div className="inc-item">Expert consultation included</div>
+                      <div className="inc-item">{destination.transfersIncluded}</div>
+                      <div className="inc-item">Enquire for pricing</div>
+                    </div>
 
-                <div className="inquiry-btns">
-                  <button
-                    type="submit"
-                    className="btn btn-gold"
-                    style={{ width: "100%", justifyContent: "center", padding: 15 }}
-                  >
-                    Get My Free Quote ↗
-                  </button>
-                  <Link
-                    to="/contact#inquiry-section"
-                    className="btn btn-outline"
-                    style={{ width: "100%", justifyContent: "center", padding: 14 }}
-                  >
-                    ✦ Talk to a Specialist
-                  </Link>
-                </div>
+                    {ddStatus === "error" && (
+                      <div
+                        role="alert"
+                        style={{ color: "#c0392b", fontSize: 13, margin: "10px 0 0" }}
+                      >
+                        Sorry, something went wrong. Please try again, or contact us
+                        directly.
+                      </div>
+                    )}
 
-                <div className="inquiry-trust">
-                  <span className="itrust">Secure enquiry</span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: 10,
-                      color: "var(--stone-dark)",
-                    }}
-                  >
-                    Reply within 2 working hours
-                  </span>
-                </div>
+                    <div className="inquiry-btns">
+                      <button
+                        type="submit"
+                        className="btn btn-gold"
+                        style={{ width: "100%", justifyContent: "center", padding: 15 }}
+                        disabled={ddStatus === "submitting"}
+                      >
+                        {ddStatus === "submitting" ? "Sending…" : "Get My Free Quote ↗"}
+                      </button>
+                      <Link
+                        to="/contact#inquiry-section"
+                        className="btn btn-outline"
+                        style={{ width: "100%", justifyContent: "center", padding: 14 }}
+                      >
+                        ✦ Talk to a Specialist
+                      </Link>
+                    </div>
 
+                    <div className="inquiry-trust">
+                      <span className="itrust">Secure enquiry</span>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-body)",
+                          fontSize: 10,
+                          color: "var(--stone-dark)",
+                        }}
+                      >
+                        Reply within 2 working hours
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </form>
           </div>
