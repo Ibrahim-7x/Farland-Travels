@@ -196,38 +196,62 @@ button{font-family:inherit}
 .deals-mega-cta{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:4px;transition:color .2s}
 .mega-dropdown .deals-mega-card:hover .deals-mega-cta{color:var(--navy)}
 
-/* ─── UMRAH MEGA (city-summary cards variant) ─── */
+/* ─── UMRAH MEGA (category rail → live package preview) ─── */
 .umrah-mega-layout{display:flex;gap:24px;align-items:stretch}
-.umrah-mega-promo{flex-shrink:0;width:190px;display:flex;flex-direction:column;gap:10px;padding-right:24px;border-right:1px solid var(--ivory-mid)}
-.umrah-mega-icon{font-size:28px;line-height:1}
-.umrah-mega-promo-title{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--navy);line-height:1.2}
-.umrah-mega-promo-sub{font-family:var(--font-body);font-size:12px;color:var(--stone-dark);line-height:1.5;margin:0}
-.umrah-mega-trust{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
-.umrah-mega-trust li{font-family:var(--font-body);font-size:11px;color:var(--charcoal)}
-.mega-dropdown .umrah-mega-cta{display:inline-flex;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;margin-top:auto;padding-top:6px;transition:color .2s;position:static;opacity:1}
-.mega-dropdown .umrah-mega-cta::before,.mega-dropdown .umrah-mega-cta::after{content:none;display:none}
-.mega-dropdown .umrah-mega-cta:hover{color:var(--navy)}
 
-.umrah-mega-cities{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.mega-dropdown .umrah-mega-city{display:flex;flex-direction:column;gap:4px;padding:14px 16px;background:var(--ivory);border:1px solid var(--ivory-mid);border-radius:var(--r-md);text-decoration:none;color:var(--navy);transition:all .22s var(--ease);font-family:var(--font-body);letter-spacing:0;text-transform:none;position:static;opacity:1}
-.mega-dropdown .umrah-mega-city::before,.mega-dropdown .umrah-mega-city::after{content:none;display:none}
-.mega-dropdown .umrah-mega-city:hover{background:var(--gold-pale);border-color:rgba(13,110,253,.2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(13,26,74,.10)}
-.umrah-mega-city-name{font-family:var(--font-body);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--navy)}
-.umrah-mega-city-count{font-family:var(--font-body);font-size:10px;color:var(--stone-dark)}
-.umrah-mega-city-price{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--gold);line-height:1;margin:4px 0 2px}
-.umrah-mega-city-tiers{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
-.umrah-mega-tier{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
-.umrah-tier-economy{background:var(--white);color:var(--navy);border:1px solid var(--ivory-mid)}
-.umrah-tier-premium{background:var(--gold-pale);color:var(--navy);border:1px solid rgba(218,165,32,.3)}
-.umrah-tier-vip{background:var(--btn-blue);color:var(--navy);border:1px solid rgba(13,110,253,.2)}
-.umrah-mega-city-link{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:8px;transition:color .2s}
-.mega-dropdown .umrah-mega-city:hover .umrah-mega-city-link{color:var(--navy)}
+/* Left rail — clickable/hoverable category headings. */
+.umrah-mega-rail{flex-shrink:0;width:210px;display:flex;flex-direction:column;gap:2px;padding-right:22px;border-right:1px solid var(--ivory-mid)}
+.mega-dropdown .umrah-mega-rail-item{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;
+  font-family:var(--font-body);font-size:13px;font-weight:600;
+  letter-spacing:0;text-transform:none;line-height:1.3;
+  color:#1a1a2e;background:transparent;border:1px solid transparent;
+  padding:9px 12px;border-radius:var(--r-md);
+  cursor:pointer;text-align:left;transition:all .18s var(--ease);
+  position:static;opacity:1;
+}
+.mega-dropdown .umrah-mega-rail-item::before,
+.mega-dropdown .umrah-mega-rail-item::after{content:none;display:none}
+.mega-dropdown .umrah-mega-rail-item:hover{background:#F5F7FA;color:var(--navy)}
+.mega-dropdown .umrah-mega-rail-item.active{background:var(--gold-pale);border-color:rgba(218,165,32,.3);color:var(--navy)}
+.umrah-mega-rail-caret{font-size:15px;color:var(--gold);opacity:0;transform:translateX(-4px);transition:all .18s var(--ease)}
+.mega-dropdown .umrah-mega-rail-item.active .umrah-mega-rail-caret{opacity:1;transform:translateX(0)}
+
+/* Right preview — header + top-3 package cards. */
+.umrah-mega-preview{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.umrah-mega-preview-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.umrah-mega-preview-title{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--navy)}
+.mega-dropdown .umrah-mega-preview-all{font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:color .2s}
+.mega-dropdown .umrah-mega-preview-all:hover{color:var(--navy)}
+.umrah-mega-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+.mega-dropdown .umrah-mega-pkg{
+  display:flex;flex-direction:column;
+  border:1px solid var(--ivory-mid);border-radius:var(--r-md);
+  background:#FFFFFF;overflow:hidden;text-decoration:none;
+  font-family:var(--font-body);color:#1a1a2e;
+  letter-spacing:0;text-transform:none;position:static;opacity:1;
+  transition:all .22s var(--ease);cursor:pointer;
+}
+.mega-dropdown .umrah-mega-pkg::before,
+.mega-dropdown .umrah-mega-pkg::after{content:none;display:none}
+.mega-dropdown .umrah-mega-pkg:hover{border-color:rgba(13,110,253,.4);transform:translateY(-2px);box-shadow:0 8px 20px rgba(13,26,74,.12)}
+.umrah-mega-pkg-thumb{position:relative;height:96px;background:#E5E7EB;overflow:hidden}
+.umrah-mega-pkg-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.umrah-mega-pkg-badge{position:absolute;top:8px;left:8px;font-family:var(--font-body);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);background:var(--gold);padding:3px 8px;border-radius:999px}
+.umrah-mega-pkg-body{display:flex;flex-direction:column;gap:3px;padding:10px 12px}
+.umrah-mega-pkg-region{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.umrah-mega-pkg-name{font-family:var(--font-display);font-size:14px;font-weight:600;color:#1a1a2e;line-height:1.25;letter-spacing:-.005em}
+.umrah-mega-pkg-meta{font-family:var(--font-body);font-size:11px;color:var(--stone-dark);display:flex;gap:6px;align-items:center}
+.umrah-mega-pkg-dot{color:var(--stone)}
 
 @media(max-width:1100px){
   .mega-filter-row{gap:18px}
   .mega-group{min-width:150px;padding-right:18px}
   .deals-mega-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-  .umrah-mega-promo{width:160px}
+  .umrah-mega-rail{width:180px;padding-right:16px}
+  .mega-dropdown .umrah-mega-rail-item{font-size:12px;padding:8px 10px}
 }
 @media(max-width:860px){
   /* Disable mega-dropdown on mobile — rely on the standard mobile menu */
@@ -245,17 +269,20 @@ footer.site-footer{background:var(--navy-grad);padding:clamp(60px,7vw,96px) clam
 .footer-logo span{color:var(--gold)}
 .footer-tagline{font-family:var(--font-body);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:16px}
 .footer-desc{font-family:var(--font-body);font-size:12px;color:rgba(255,255,255,.32);line-height:1.7;margin-bottom:22px;max-width:240px}
-.footer-socials{display:flex;gap:10px}
+.footer-contact{color:rgba(255,255,255,.85);font-weight:500}
+.footer-contact li{line-height:1.7}
+.footer-contact a{color:rgba(255,255,255,.85);transition:color .2s}
+.footer-contact a:hover{color:var(--gold)}
+.footer-socials{display:flex;gap:10px;margin-top:24px}
 .fsoc{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:11px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:all .25s}
-.fsoc:hover{border-color:var(--gold);color:var(--gold)}
+.fsoc svg{width:16px;height:16px;display:block}
+.fsoc:hover{border-color:var(--gold);color:var(--gold);background:rgba(13,110,253,.12);transform:translateY(-2px)}
 .footer-col-label{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .footer-links{list-style:none;display:flex;flex-direction:column;gap:10px}
 .footer-links a{font-family:var(--font-body);font-size:12px;color:rgba(255,255,255,.40);transition:color .2s}
 .footer-links a:hover{color:var(--white)}
 .footer-base{border-top:1px solid rgba(255,255,255,.06);padding:24px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
 .footer-legal{font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,.22)}
-.footer-trust-badges{display:flex;gap:10px;flex-wrap:wrap}
-.ftrust{font-family:var(--font-body);font-size:10px;letter-spacing:.02em;text-transform:uppercase;color:rgba(255,255,255,.28);padding:4px 10px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,.10)}
 
 /* ─── REVEAL ANIMATION ─── */
 @media(prefers-reduced-motion:no-preference){

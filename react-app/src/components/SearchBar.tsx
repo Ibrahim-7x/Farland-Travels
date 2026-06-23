@@ -12,11 +12,11 @@ import {
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
-  DESTINATIONS,
   getAllMonths,
   getDestinationMonths,
   type Destination,
 } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
 import "./SearchBar.css";
 
 type Variant = "hero" | "light";
@@ -52,10 +52,11 @@ export function SearchBar({
   onSubmitted,
 }: Props) {
   const navigate = useNavigate();
+  const { destinations } = useDestinations();
 
   const initialDest =
     (initialDestinationSlug &&
-      DESTINATIONS.find((d) => d.slug === initialDestinationSlug)) ||
+      destinations.find((d) => d.slug === initialDestinationSlug)) ||
     null;
 
   const [selectedDest, setSelectedDest] = useState<Destination | null>(
@@ -144,20 +145,20 @@ export function SearchBar({
   const filteredDestinations = useMemo(() => {
     const q = destQuery.trim().toLowerCase();
     if (!q || (selectedDest && destQuery === selectedDest.name)) {
-      return DESTINATIONS;
+      return destinations;
     }
-    return DESTINATIONS.filter(
+    return destinations.filter(
       (d) =>
         d.name.toLowerCase().includes(q) ||
         d.region.toLowerCase().includes(q) ||
         d.regionLabel.toLowerCase().includes(q)
     );
-  }, [destQuery, selectedDest]);
+  }, [destinations, destQuery, selectedDest]);
 
   const availableMonths = useMemo(() => {
     if (selectedDest) return getDestinationMonths(selectedDest);
-    return getAllMonths();
-  }, [selectedDest]);
+    return getAllMonths(destinations);
+  }, [destinations, selectedDest]);
 
   // Handle month mismatch via direct state check during render (recommended for synchronous state sync)
   if (selectedMonth && !availableMonths.includes(selectedMonth)) {

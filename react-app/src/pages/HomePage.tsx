@@ -1,33 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { DESTINATIONS } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
+import { UMRAH_HOME_PACKAGES } from "../data/umrahHome";
 import { SearchBar } from "../components/SearchBar";
+import { Testimonials } from "../components/Testimonials";
+import { useSiteSettings, telHref } from "../contexts/siteSettings";
 import "./HomePage.css";
 
-function pad(n: number): string {
-  return String(n).padStart(2, "0");
-}
-
 export function HomePage() {
-  const [totalSecs, setTotalSecs] = useState(18 * 3600 + 42 * 60 + 7);
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setTotalSecs((s) => Math.max(0, s - 1));
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const h = Math.floor(totalSecs / 3600);
-  const m = Math.floor((totalSecs % 3600) / 60);
-  const s = totalSecs % 60;
+  const { contactPhone } = useSiteSettings();
+  const { destinations } = useDestinations();
+  const phoneLink = telHref(contactPhone);
 
   const toggleWish = (key: string) =>
     setWishlist((w) => ({ ...w, [key]: !w[key] }));
 
-  const [featured, ...rest] = DESTINATIONS;
-  const deals = DESTINATIONS;
+  const [featured, ...rest] = destinations;
+  const deals = destinations;
+
+  const [umrahFeatured, ...umrahRest] = UMRAH_HOME_PACKAGES;
 
   return (
     <>
@@ -43,7 +35,7 @@ export function HomePage() {
         <div className="hero-content">
           <div className="hero-badge">
             <div className="hero-dot"></div>
-            <span>New: 4 curated journeys for 2025</span>
+            <span>Curated journeys · fully costed</span>
           </div>
           <h1 className="hero-headline">
             The World's Most
@@ -69,16 +61,108 @@ export function HomePage() {
         </div>
         <div className="hero-stats">
           <div className="hero-stat">
-            <strong>15+</strong>
-            <small>Years of expertise</small>
+            <strong>Expert</strong>
+            <small>team of specialists</small>
           </div>
           <div className="hero-stat">
-            <strong>4.9★</strong>
-            <small>Trustpilot rating</small>
+            <strong>Tailored</strong>
+            <small>itineraries, every time</small>
           </div>
-          <div className="hero-stat">
-            <strong>12,000+</strong>
-            <small>Holidays crafted</small>
+        </div>
+      </section>
+
+      {/* UMRAH PACKAGES — teaser, same card format as Curated Destinations */}
+      <section id="umrah-home">
+        <div className="destinations-inner">
+          <div className="destinations-header">
+            <div>
+              <h2 className="section-title">Umrah Packages</h2>
+              <p className="section-sub">
+                Fully-priced sacred journeys to Makkah &amp; Madinah — flights,
+                hotels and transfers included.
+              </p>
+            </div>
+            <Link to="/umrah" className="btn-text-gold">
+              View all Umrah packages →
+            </Link>
+          </div>
+          <div className="dest-grid">
+            {umrahFeatured && (
+              <Link
+                to="/umrah"
+                className="dest-card featured reveal"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <div className="dest-img">
+                  <img src={umrahFeatured.image} alt={umrahFeatured.name} />
+                  <div className="dest-overlay"></div>
+                  <div className="dest-img-meta">
+                    <div className="dest-region">{umrahFeatured.regionLabel}</div>
+                    <div className="dest-name">{umrahFeatured.name}</div>
+                  </div>
+                  {umrahFeatured.badge && (
+                    <div className="dest-badge">
+                      <span>{umrahFeatured.badge}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="dest-body">
+                  <p className="dest-desc">{umrahFeatured.description}</p>
+                  <div className="dest-footer">
+                    <div className="dest-price">
+                      <small>From per person</small>
+                      <strong>{umrahFeatured.fromPrice}</strong>
+                    </div>
+                    <div className="dest-tags">
+                      {umrahFeatured.tags.map((t) => (
+                        <span className="tag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {umrahRest.map((p, i) => (
+              <Link
+                key={p.id}
+                to="/umrah"
+                className={`dest-card reveal reveal-delay-${i + 1}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <div className="dest-img">
+                  <img src={p.image} alt={p.name} />
+                  <div className="dest-overlay"></div>
+                  <div className="dest-img-meta">
+                    <div className="dest-region">{p.regionLabel}</div>
+                    <div className="dest-name">{p.name}</div>
+                  </div>
+                  {p.badge && (
+                    <div className="dest-badge">
+                      <span>{p.badge}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="dest-body">
+                  <p className="dest-desc">{p.description}</p>
+                  <div className="dest-footer">
+                    <div className="dest-price">
+                      <small>From per person</small>
+                      <strong>{p.fromPrice}</strong>
+                    </div>
+                    <div className="dest-tags">
+                      {p.tags.slice(0, 2).map((t) => (
+                        <span className="tag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -88,9 +172,9 @@ export function HomePage() {
         <div className="destinations-inner">
           <div className="destinations-header">
             <div>
-              <h2 className="section-title">Curated Destinations</h2>
+              <h2 className="section-title">Holiday Destinations</h2>
               <p className="section-sub">
-                Four hand-selected journeys, each fully costed and ready to book.
+                Hand-selected journeys, each fully costed and ready to book.
               </p>
             </div>
             <Link to="/destinations" className="btn-text-gold">
@@ -209,27 +293,8 @@ export function HomePage() {
             <div>
               <h2 className="section-title">Exceptional Deals</h2>
               <p className="section-sub" style={{ color: "rgba(255,255,255,.45)" }}>
-                Live published prices on our four signature journeys.
+                Live published prices on our signature journeys.
               </p>
-            </div>
-            <div className="countdown-bar">
-              <span className="label">Deals expire in</span>
-              <div className="countdown-timer">
-                <div className="time-block">
-                  <strong>{pad(h)}</strong>
-                  <small>hrs</small>
-                </div>
-                <span className="time-sep">:</span>
-                <div className="time-block">
-                  <strong>{pad(m)}</strong>
-                  <small>min</small>
-                </div>
-                <span className="time-sep">:</span>
-                <div className="time-block">
-                  <strong>{pad(s)}</strong>
-                  <small>sec</small>
-                </div>
-              </div>
             </div>
           </div>
           <div className="deals-grid">
@@ -290,8 +355,8 @@ export function HomePage() {
                 />
               </div>
               <div className="why-badge">
-                <strong>15+</strong>
-                <span>Years crafting journeys</span>
+                <strong>Hands-on</strong>
+                <span>destination expertise</span>
               </div>
             </div>
             <div className="reveal reveal-delay-2">
@@ -335,8 +400,8 @@ export function HomePage() {
                 <div className="why-feature">
                   <div className="why-icon">🛡</div>
                   <div className="why-feature-text">
-                    <h4>Fully protected</h4>
-                    <p>Every penny is fully financially protected. Always.</p>
+                    <h4>Trusted service</h4>
+                    <p>Clear, honest pricing and a dedicated specialist from your first enquiry to your return home.</p>
                   </div>
                 </div>
                 <div className="why-feature">
@@ -344,16 +409,16 @@ export function HomePage() {
                   <div className="why-feature-text">
                     <h4>Responsible travel</h4>
                     <p>
-                      We offset carbon on every booking and partner with conservation-led
-                      lodges.
+                      We work with partners who care for the destinations and
+                      communities we visit.
                     </p>
                   </div>
                 </div>
                 <div className="why-feature">
                   <div className="why-icon">💰</div>
                   <div className="why-feature-text">
-                    <h4>Price match pledge</h4>
-                    <p>Find the same trip for less and we'll match it.</p>
+                    <h4>Competitive pricing</h4>
+                    <p>Fair, transparent pricing with no hidden booking fees.</p>
                   </div>
                 </div>
               </div>
@@ -362,110 +427,8 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section id="testimonials">
-        <div className="testimonials-inner">
-          <div className="testimonials-header">
-            <h2 className="section-title" style={{ textAlign: "center" }}>
-              Heard from Our Travellers
-            </h2>
-          </div>
-          <div className="testi-grid">
-            <div className="testi-card reveal">
-              <div className="testi-quote-mark">&ldquo;</div>
-              <div className="testi-stars">★★★★★</div>
-              <p className="testi-text">
-                "Farland turned a daydream into an itinerary — Singapore and Bali back to
-                back was the easiest two weeks of our lives."
-              </p>
-              <div className="testi-dest-tag">
-                <span>✈ Singapore &amp; Bali</span>
-              </div>
-              <div className="testi-author">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=70"
-                  alt="Sarah M"
-                  className="testi-avatar"
-                />
-                <div className="testi-author-info">
-                  <h5>Sarah Mitchell</h5>
-                  <small>11-night escape · Perth</small>
-                </div>
-              </div>
-              <div className="testi-platform">Trustpilot</div>
-            </div>
-
-            <div className="testi-card highlight reveal reveal-delay-1">
-              <div className="testi-quote-mark">&ldquo;</div>
-              <div className="testi-stars">★★★★★</div>
-              <p className="testi-text">
-                "The Bali long-stay was perfect — four very different resorts in twenty
-                nights. Every transfer was waiting. Every detail was thought through."
-              </p>
-              <div className="testi-dest-tag">
-                <span>✈ Bali Long Stay</span>
-              </div>
-              <div className="testi-author">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=70"
-                  alt="James P"
-                  className="testi-avatar"
-                />
-                <div className="testi-author-info">
-                  <h5>James Pemberton</h5>
-                  <small>20-night Bali · Perth</small>
-                </div>
-              </div>
-              <div className="testi-platform">Google</div>
-            </div>
-
-            <div className="testi-card reveal reveal-delay-2">
-              <div className="testi-quote-mark">&ldquo;</div>
-              <div className="testi-stars">★★★★★</div>
-              <p className="testi-text">
-                "Our Umrah was handled with the care it deserved. Hotels minutes from the
-                Haram, transfers all arranged. We will only travel with Farland from now
-                on."
-              </p>
-              <div className="testi-dest-tag">
-                <span>✈ Makkah &amp; Madinah</span>
-              </div>
-              <div className="testi-author">
-                <img
-                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=70"
-                  alt="Priya K"
-                  className="testi-avatar"
-                />
-                <div className="testi-author-info">
-                  <h5>Yasmin Khan</h5>
-                  <small>10-night Umrah · Manchester</small>
-                </div>
-              </div>
-              <div className="testi-platform">Trustpilot</div>
-            </div>
-          </div>
-          <div className="trustpilot-bar reveal">
-            <div className="trust-item">
-              <strong>4.9 / 5</strong>
-              <span>Trustpilot rating</span>
-            </div>
-            <div className="trust-divider"></div>
-            <div className="trust-item">
-              <strong>12,400+</strong>
-              <span>Holidays crafted</span>
-            </div>
-            <div className="trust-divider"></div>
-            <div className="trust-item">
-              <strong>98%</strong>
-              <span>Would recommend us</span>
-            </div>
-            <div className="trust-divider"></div>
-            <div className="trust-item">
-              <strong>Fully protected</strong>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* TESTIMONIALS — only renders when there are published reviews */}
+      <Testimonials />
 
       {/* CTA BANNER */}
       <section id="cta-banner">
@@ -489,118 +452,28 @@ export function HomePage() {
             </p>
             <div className="cta-features">
               <span className="cta-feature">No booking fees</span>
-              <span className="cta-feature">Price match guarantee</span>
+              <span className="cta-feature">Competitive pricing</span>
               <span className="cta-feature">Expert consultation included</span>
-              <span className="cta-feature">Fullyprotected</span>
+              <span className="cta-feature">Trusted service</span>
             </div>
             <div className="cta-btns">
               <Link to="/contact#inquiry-section" className="btn btn-gold">
                 Start planning your trip ↗
               </Link>
-              <a href="tel:+44800123456" className="btn btn-outline-white">
-                ☎ Call +44 800 123 456
-              </a>
+              {phoneLink ? (
+                <a href={phoneLink} className="btn btn-outline-white">
+                  ☎ Call {contactPhone}
+                </a>
+              ) : (
+                <Link to="/contact#inquiry-section" className="btn btn-outline-white">
+                  ☎ Call us
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* NEWSLETTER */}
-      <section id="newsletter">
-        <div className="newsletter-inner">
-          <div className="reveal">
-            <h2 className="section-title">
-              Travel Inspiration,
-              <br />
-              Delivered to You
-            </h2>
-            <p className="section-sub">
-              Join 45,000+ discerning travellers who receive our curated destination
-              guides, early-access deals, and expert insights — never spam.
-            </p>
-            <div className="newsletter-perks">
-              <div className="perk">
-                <div className="perk-icon">🗺</div>
-                <div className="perk-text">
-                  <h5>Monthly destination guides</h5>
-                  <p>
-                    Deep-dive editorial guides to the world's most captivating places.
-                  </p>
-                </div>
-              </div>
-              <div className="perk">
-                <div className="perk-icon">⚡</div>
-                <div className="perk-text">
-                  <h5>Early access to flash deals</h5>
-                  <p>
-                    Subscribers get 48-hour early access to limited-time offers.
-                  </p>
-                </div>
-              </div>
-              <div className="perk">
-                <div className="perk-icon">✨</div>
-                <div className="perk-text">
-                  <h5>Exclusive member perks</h5>
-                  <p>Complimentary upgrades, early check-ins, and private experiences.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <form
-            className="newsletter-form reveal reveal-delay-2"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <div className="newsletter-form-title">Begin Your Journey</div>
-            <p className="newsletter-form-sub">
-              Tell us a little about your travel dreams and we'll tailor your experience
-              from day one.
-            </p>
-            <div className="form-row-2">
-              <div className="form-group">
-                <label htmlFor="nl-first">First name</label>
-                <input id="nl-first" type="text" placeholder="Your first name" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="nl-last">Last name</label>
-                <input id="nl-last" type="text" placeholder="Your last name" />
-              </div>
-            </div>
-            <div className="form-group">
-              <label htmlFor="nl-email">Email address</label>
-              <input id="nl-email" type="email" placeholder="your@email.com" />
-            </div>
-            <div className="form-group">
-              <label htmlFor="nl-dream">Which journey interests you?</label>
-              <select id="nl-dream" defaultValue="">
-                <option value="">Select a destination</option>
-                {DESTINATIONS.map((d) => (
-                  <option key={d.slug}>{d.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-consent">
-              <input type="checkbox" id="consent" />
-              <label htmlFor="consent">
-                <span>
-                  I'd love to receive Farland's travel inspiration and exclusive offers.
-                  I understand I can unsubscribe at any time.{" "}
-                  <a href="#privacy">Privacy policy</a>
-                </span>
-              </label>
-            </div>
-            <button
-              type="submit"
-              className="btn btn-gold"
-              style={{ width: "100%", justifyContent: "center", padding: 16 }}
-            >
-              Join 45,000+ travellers ↗
-            </button>
-            <p className="newsletter-note">
-              No spam. Unsubscribe any time. Your data is never sold.
-            </p>
-          </form>
-        </div>
-      </section>
     </>
   );
 }

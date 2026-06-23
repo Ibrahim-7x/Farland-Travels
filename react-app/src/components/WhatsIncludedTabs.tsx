@@ -68,10 +68,10 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${SG_BALI_IMG}/singapore-bali-lobby.jpg`, alt: "Hotel lobby" },
-                { src: `${SG_BALI_IMG}/singapore-bali-hotel.jpg`, alt: "Hotel exterior" },
-                { src: `${SG_BALI_IMG}/singapore-bali-bed-1.jpg`, alt: "Superior Room" },
-                { src: `${SG_BALI_IMG}/singapore-bali-bed-2.jpg`, alt: "Superior Room — twin layout" },
+                { src: `${SG_BALI_IMG}/singapore-bali-lobby.webp`, alt: "Hotel lobby" },
+                { src: `${SG_BALI_IMG}/singapore-bali-hotel.webp`, alt: "Hotel exterior" },
+                { src: `${SG_BALI_IMG}/singapore-bali-bed-1.webp`, alt: "Superior Room" },
+                { src: `${SG_BALI_IMG}/singapore-bali-bed-2.webp`, alt: "Superior Room — twin layout" },
               ],
             },
             {
@@ -88,9 +88,9 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${SG_BALI_IMG}/singapore-bali-exc.jpg`, alt: "Excursion" },
-                { src: `${SG_BALI_IMG}/singapore-bali-exc-2.jpg`, alt: "Excursion" },
-                { src: `${SG_BALI_IMG}/singapore-bali-exc-3.jpg`, alt: "Excursion" },
+                { src: `${SG_BALI_IMG}/singapore-bali-exc.webp`, alt: "Excursion" },
+                { src: `${SG_BALI_IMG}/singapore-bali-exc-2.webp`, alt: "Excursion" },
+                { src: `${SG_BALI_IMG}/singapore-bali-exc-3.webp`, alt: "Excursion" },
               ],
             },
           ],
@@ -110,10 +110,10 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${SG_BALI_IMG}/bali-hotel.jpg`, alt: "Hotel exterior" },
-                { src: `${SG_BALI_IMG}/bali-deck.jpg`, alt: "Pool deck" },
-                { src: `${SG_BALI_IMG}/bali-room-studio.jpg`, alt: "Studio Room" },
-                { src: `${SG_BALI_IMG}/bali-studio-2.jpg`, alt: "Studio Room — alternate view" },
+                { src: `${SG_BALI_IMG}/bali-hotel.webp`, alt: "Hotel exterior" },
+                { src: `${SG_BALI_IMG}/bali-deck.webp`, alt: "Pool deck" },
+                { src: `${SG_BALI_IMG}/bali-room-studio.webp`, alt: "Studio Room" },
+                { src: `${SG_BALI_IMG}/bali-studio-2.webp`, alt: "Studio Room — alternate view" },
               ],
             },
             {
@@ -129,8 +129,8 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${SG_BALI_IMG}/bali-exc.jpg`, alt: "Excursion" },
-                { src: `${SG_BALI_IMG}/bali-exc-2.jpg`, alt: "Excursion" },
+                { src: `${SG_BALI_IMG}/bali-exc.webp`, alt: "Excursion" },
+                { src: `${SG_BALI_IMG}/bali-exc-2.webp`, alt: "Excursion" },
               ],
             },
             {
@@ -168,11 +168,11 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${DUBAI_BALI_IMG}/dubai-hotel.jpg`, alt: "Hotel exterior" },
-                { src: `${DUBAI_BALI_IMG}/dubai-hotel-2.jpg`, alt: "Hotel exterior" },
-                { src: `${DUBAI_BALI_IMG}/dubai-hotel-3.jpg`, alt: "Hotel interior" },
-                { src: `${DUBAI_BALI_IMG}/dubai-room.jpg`, alt: "Classic Room" },
-                { src: `${DUBAI_BALI_IMG}/dubai-room-2.jpg`, alt: "Classic Room — alternate view" },
+                { src: `${DUBAI_BALI_IMG}/dubai-hotel.webp`, alt: "Hotel exterior" },
+                { src: `${DUBAI_BALI_IMG}/dubai-hotel-2.webp`, alt: "Hotel exterior" },
+                { src: `${DUBAI_BALI_IMG}/dubai-hotel-3.webp`, alt: "Hotel interior" },
+                { src: `${DUBAI_BALI_IMG}/dubai-room.webp`, alt: "Classic Room" },
+                { src: `${DUBAI_BALI_IMG}/dubai-room-2.webp`, alt: "Classic Room — alternate view" },
               ],
             },
           ],
@@ -196,10 +196,10 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel.jpg`, alt: "Bali & Gili tour hotel" },
-                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel-2.jpg`, alt: "Bali & Gili tour hotel" },
-                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel-3.jpg`, alt: "Bali & Gili tour hotel" },
-                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel-4.jpg`, alt: "Bali & Gili tour hotel" },
+                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel.webp`, alt: "Bali & Gili tour hotel" },
+                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel-2.webp`, alt: "Bali & Gili tour hotel" },
+                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel-3.webp`, alt: "Bali & Gili tour hotel" },
+                { src: `${DUBAI_BALI_IMG}/bali-gili-hotel-4.webp`, alt: "Bali & Gili tour hotel" },
               ],
             },
             {
@@ -237,9 +237,9 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${BALI_LONG_IMG}/ashoka-tree-resort.jpg`, alt: "Ashoka Tree Resort" },
-                { src: `${BALI_LONG_IMG}/ashoka-tree-resort-room.jpg`, alt: "Ashoka Tree Resort room" },
-                { src: `${BALI_LONG_IMG}/ashoka-tree-resort-room-2.jpg`, alt: "Ashoka Tree Resort room - photo 2" },
+                { src: `${BALI_LONG_IMG}/ashoka-tree-resort.webp`, alt: "Ashoka Tree Resort" },
+                { src: `${BALI_LONG_IMG}/ashoka-tree-resort-room.webp`, alt: "Ashoka Tree Resort room" },
+                { src: `${BALI_LONG_IMG}/ashoka-tree-resort-room-2.webp`, alt: "Ashoka Tree Resort room - photo 2" },
               ],
             },
           ],
@@ -259,10 +259,10 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${BALI_LONG_IMG}/bali-nusa-dua.jpg`, alt: "Mercure Bali Nusa Dua" },
-                { src: `${BALI_LONG_IMG}/bali-nusa-dua-2.jpg`, alt: "Mercure Bali Nusa Dua - photo 2" },
-                { src: `${BALI_LONG_IMG}/bali-nusa-dua-3.jpg`, alt: "Mercure Bali Nusa Dua - photo 3" },
-                { src: `${BALI_LONG_IMG}/bali-nusa-dua-4.jpg`, alt: "Mercure Bali Nusa Dua - photo 4" },
+                { src: `${BALI_LONG_IMG}/bali-nusa-dua.webp`, alt: "Mercure Bali Nusa Dua" },
+                { src: `${BALI_LONG_IMG}/bali-nusa-dua-2.webp`, alt: "Mercure Bali Nusa Dua - photo 2" },
+                { src: `${BALI_LONG_IMG}/bali-nusa-dua-3.webp`, alt: "Mercure Bali Nusa Dua - photo 3" },
+                { src: `${BALI_LONG_IMG}/bali-nusa-dua-4.webp`, alt: "Mercure Bali Nusa Dua - photo 4" },
               ],
             },
           ],
@@ -282,10 +282,10 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${BALI_LONG_IMG}/bali-sages.jpg`, alt: "Hotel Sages" },
-                { src: `${BALI_LONG_IMG}/bali-sages-1.jpg`, alt: "Hotel Sages - photo 2" },
-                { src: `${BALI_LONG_IMG}/bali-sages-2.jpg`, alt: "Hotel Sages - photo 3" },
-                { src: `${BALI_LONG_IMG}/bali-sages-3.jpg`, alt: "Hotel Sages - photo 4" },
+                { src: `${BALI_LONG_IMG}/bali-sages.webp`, alt: "Hotel Sages" },
+                { src: `${BALI_LONG_IMG}/bali-sages-1.webp`, alt: "Hotel Sages - photo 2" },
+                { src: `${BALI_LONG_IMG}/bali-sages-2.webp`, alt: "Hotel Sages - photo 3" },
+                { src: `${BALI_LONG_IMG}/bali-sages-3.webp`, alt: "Hotel Sages - photo 4" },
               ],
             },
           ],
@@ -305,10 +305,10 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
                 },
               ],
               images: [
-                { src: `${BALI_LONG_IMG}/bali-seminyak.jpg`, alt: "Paragon Hotel Seminyak" },
-                { src: `${BALI_LONG_IMG}/bali-seminyak-1.jpg`, alt: "Paragon Hotel Seminyak - photo 2" },
-                { src: `${BALI_LONG_IMG}/bali-seminyak-2.jpg`, alt: "Paragon Hotel Seminyak - photo 3" },
-                { src: `${BALI_LONG_IMG}/bali-seminyak-3.jpg`, alt: "Paragon Hotel Seminyak - photo 4" },
+                { src: `${BALI_LONG_IMG}/bali-seminyak.webp`, alt: "Paragon Hotel Seminyak" },
+                { src: `${BALI_LONG_IMG}/bali-seminyak-1.webp`, alt: "Paragon Hotel Seminyak - photo 2" },
+                { src: `${BALI_LONG_IMG}/bali-seminyak-2.webp`, alt: "Paragon Hotel Seminyak - photo 3" },
+                { src: `${BALI_LONG_IMG}/bali-seminyak-3.webp`, alt: "Paragon Hotel Seminyak - photo 4" },
               ],
             },
             {
@@ -370,8 +370,30 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
       ];
     }
 
-    default:
-      return [];
+    default: {
+      // Admin-created deals (any slug not hard-coded above): build a single
+      // "What's included" tab generically from the deal's components so the
+      // section is never empty.
+      const components = dest.components ?? [];
+      if (components.length === 0) return [];
+      return [
+        {
+          id: "included",
+          label: "What's included",
+          flag: "✓",
+          sections: [
+            {
+              icon: "🧳",
+              title: "Package components",
+              items: components.map((c) => ({
+                label: c.label,
+                primary: c.details,
+              })),
+            },
+          ],
+        },
+      ];
+    }
   }
 }
 

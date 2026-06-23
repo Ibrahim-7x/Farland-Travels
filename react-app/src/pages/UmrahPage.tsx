@@ -1,23 +1,98 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  UMRAH_CITIES,
   UMRAH_EXCLUSIONS,
   UMRAH_TERMS,
   buildUmrahItinerary,
-  getUmrahFromPrice,
-  getUmrahPackageCount,
-} from "../data/umrah";
-import type { UmrahInclusion, UmrahPackage, UmrahTier } from "../data/umrah";
+  lowestPriceDisplay,
+} from "../data/umrahContent";
+import type {
+  UmrahInclusion,
+  UmrahPackage,
+  UmrahTier,
+} from "../data/umrahContent";
 import "./DealsPage.css";
 import "./UmrahPage.css";
 
-const DEFAULT_CITY_ID = UMRAH_CITIES[0]?.id ?? "perth";
+/** Raw shape returned by GET /api/umrah-packages (camelCase, nullable). */
+type ApiPackage = {
+  id: string;
+  city: string;
+  stars: string;
+  nights: string;
+  roomType: string;
+  month: string | null;
+  makkahHotel: string | null;
+  makkahNights: string | null;
+  makkahRating: number | null;
+  makkahDistance: string | null;
+  madinahHotel: string | null;
+  madinahNights: string | null;
+  madinahRating: number | null;
+  madinahDistance: string | null;
+  price: number;
+  priceDisplay: string | null;
+  name: string | null;
+  tier: string | null;
+  departureDates: string[] | null;
+  roomRates: { room: string; priceDisplay: string }[] | null;
+  flight: { airline: string; routing: string } | null;
+  inclusions: string[] | null;
+  badge: string | null;
+  mostPopular: boolean;
+};
 
-/** Maps a location hash ("#perth") to a known departure-city id, or null. */
-function cityIdFromHash(hash: string): string | null {
-  const id = hash.slice(1);
-  return UMRAH_CITIES.some((c) => c.id === id) ? id : null;
+/** A normalised package that also carries its departure city for filtering. */
+type FlatPackage = UmrahPackage & { city: string };
+
+type City = { id: string; name: string; sortOrder?: number };
+
+function normalize(raw: ApiPackage): FlatPackage {
+  return {
+    id: raw.id,
+    city: raw.city,
+    stars: raw.stars,
+    nights: raw.nights,
+    roomType: raw.roomType,
+    month: raw.month ?? "",
+    makkahHotel: raw.makkahHotel ?? "",
+    makkahNights: raw.makkahNights ?? "",
+    madinahHotel: raw.madinahHotel ?? "",
+    madinahNights: raw.madinahNights ?? "",
+    price: raw.price,
+    priceDisplay: raw.priceDisplay ?? "",
+    name: raw.name ?? undefined,
+    tier: (raw.tier as UmrahTier | null) ?? undefined,
+    departureDates: raw.departureDates ?? undefined,
+    roomRates: raw.roomRates ?? undefined,
+    makkahRating: raw.makkahRating ?? undefined,
+    makkahDistance: raw.makkahDistance ?? undefined,
+    madinahRating: raw.madinahRating ?? undefined,
+    madinahDistance: raw.madinahDistance ?? undefined,
+    flight: raw.flight ?? undefined,
+    inclusions: (raw.inclusions as UmrahInclusion[] | null) ?? undefined,
+    badge: (raw.badge as UmrahPackage["badge"]) ?? undefined,
+    mostPopular: raw.mostPopular || undefined,
+  };
+}
+
+/** Star-rating tabs. Membership is derived by matching the digit in the
+ *  free-text `stars` field (e.g. "5/4 Star" appears under both 5 and 4). */
+const RATING_TABS = [
+  { id: "all", label: "All Packages" },
+  { id: "5", label: "5-Star" },
+  { id: "4", label: "4-Star" },
+  { id: "3", label: "3-Star" },
+] as const;
+type RatingId = (typeof RATING_TABS)[number]["id"];
+
+function matchesRating(stars: string, rating: RatingId): boolean {
+  return rating === "all" || stars.includes(rating);
+}
+
+/** "Gold Coast" → "gold-coast" — matches the anchor slugs used in nav links. */
+function citySlug(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, "-");
 }
 
 const INCLUSION_META: Record<UmrahInclusion, { icon: string; label: string }> =
@@ -309,73 +384,156 @@ function UmrahDetailsModal({ cityName, pkg, onClose }: UmrahDetailsModalProps) {
   );
 }
 
+/** Three placeholder cards shown while packages load. */
+function SkeletonGrid() {
+  const bar = (w: string): React.CSSProperties => ({
+    height: 14,
+    width: w,
+    borderRadius: "var(--r-sm)",
+    background: "var(--ivory-mid)",
+  });
+  return (
+    <div className="um-grid" aria-hidden="true">
+      {[0, 1, 2].map((i) => (
+        <article className="um-card" key={i}>
+          <div
+            className="um-card-media"
+            style={{ background: "var(--ivory-mid)" }}
+          />
+          <div
+            className="um-card-body"
+            style={{ display: "grid", gap: 12, padding: 20 }}
+          >
+            <div style={bar("70%")} />
+            <div style={bar("45%")} />
+            <div style={{ ...bar("35%"), height: 28 }} />
+            <div style={bar("90%")} />
+            <div style={bar("80%")} />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+type LoadStatus = "loading" | "error" | "ready";
+
 export function UmrahPage() {
   const location = useLocation();
-  const fromPrice = getUmrahFromPrice();
-  const totalPackages = getUmrahPackageCount();
   const tabsRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  // Deep-link support for the nav dropdown's per-city anchors (/umrah#perth):
-  // the hash selects the matching tab (the per-city sections no longer all
-  // exist in the DOM at once). Synced during render rather than in an effect
-  // so the panel never flashes the previous city on navigation.
-  const [activeCityId, setActiveCityId] = useState(
-    () => cityIdFromHash(location.hash) ?? DEFAULT_CITY_ID,
-  );
-  const [navKey, setNavKey] = useState(location.key);
-  if (location.key !== navKey) {
-    setNavKey(location.key);
-    const fromHash = cityIdFromHash(location.hash);
-    if (fromHash) setActiveCityId(fromHash);
+  const [packages, setPackages] = useState<FlatPackage[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [status, setStatus] = useState<LoadStatus>("loading");
+
+  // Filter state: star rating tab + departure city ("" = all cities).
+  const [activeRating, setActiveRating] = useState<RatingId>("all");
+  const [selectedCity, setSelectedCity] = useState<string>("");
+
+  // Fetch published packages once on mount.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/umrah-packages")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<ApiPackage[]>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setPackages(data.map(normalize));
+        setStatus("ready");
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Fetch the admin-managed city list for the dropdown (best-effort).
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/cities")
+      .then((res) => (res.ok ? (res.json() as Promise<City[]>) : []))
+      .then((data) => {
+        if (!cancelled) setCities(data);
+      })
+      .catch(() => {
+        /* dropdown falls back to cities found in the packages */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // City options: prefer the managed list; fall back to distinct package
+  // cities. Either way, only show cities that actually have packages so the
+  // dropdown never offers an empty result.
+  const cityOptions = useMemo(() => {
+    const withPackages = new Set(packages.map((p) => p.city));
+    const managed = cities
+      .map((c) => c.name)
+      .filter((name) => withPackages.has(name));
+    const fallback = Array.from(withPackages).sort((a, b) =>
+      a.localeCompare(b),
+    );
+    return managed.length ? managed : fallback;
+  }, [cities, packages]);
+
+  // Preselect a city when arriving via a hash deep-link (e.g. /umrah#sydney).
+  // Resolved during render — not in an effect — so it applies the moment the
+  // city or package data loads, without a cascading re-render. The key guard
+  // makes it run once per navigation (and again on a fresh deep-link).
+  const [hashAppliedKey, setHashAppliedKey] = useState<string | null>(null);
+  const hashSlug = location.hash.slice(1);
+  const dataReady = cities.length > 0 || packages.length > 0;
+  if (hashSlug && dataReady && hashAppliedKey !== location.key) {
+    const match =
+      cities.find((c) => c.id === hashSlug)?.name ??
+      packages.find((p) => citySlug(p.city) === hashSlug)?.city;
+    setHashAppliedKey(location.key);
+    if (match) setSelectedCity(match);
   }
 
-  // Scroll down to the tab bar when arriving via a per-city anchor, center
-  // the matching tab in the (mobile, horizontally scrollable) strip, and move
-  // focus to it — mirroring native fragment navigation. "instant" rather than
-  // "auto" under reduced motion: html{scroll-behavior:smooth} would otherwise
-  // re-smooth it.
+  // Smooth-scroll the filter bar into view on a hash deep-link (side effect).
   useEffect(() => {
-    const cityId = cityIdFromHash(location.hash);
-    if (!cityId) return;
+    if (!location.hash) return;
+    const wrap = tabsRef.current;
+    if (!wrap) return;
     const behavior: ScrollBehavior = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches
       ? "instant"
       : "smooth";
-    const wrap = tabsRef.current;
-    if (wrap) {
-      const top = wrap.getBoundingClientRect().top + window.scrollY - 120;
-      window.scrollTo({ top, behavior });
-    }
-    const tab = document.getElementById(`um-tab-${cityId}`);
-    const strip = tab?.closest(".um-tabs");
-    if (tab && strip) {
-      const delta =
-        tab.getBoundingClientRect().left - strip.getBoundingClientRect().left;
-      strip.scrollTo({
-        left: strip.scrollLeft + delta - (strip.clientWidth - tab.clientWidth) / 2,
-        behavior,
-      });
-    }
-    tab?.focus({ preventScroll: true });
+    const top = wrap.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top, behavior });
   }, [location]);
 
-  const onTabKeyDown = (e: React.KeyboardEvent, index: number) => {
-    const n = UMRAH_CITIES.length;
-    let next: number | null = null;
-    if (e.key === "ArrowRight") next = (index + 1) % n;
-    else if (e.key === "ArrowLeft") next = (index - 1 + n) % n;
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = n - 1;
-    if (next === null) return;
-    e.preventDefault();
-    setActiveCityId(UMRAH_CITIES[next].id);
-    tabRefs.current[next]?.focus();
-  };
+  // Apply the city filter first, then derive per-rating counts from it so the
+  // tab numbers reflect the chosen city.
+  const cityFiltered = useMemo(
+    () => packages.filter((p) => !selectedCity || p.city === selectedCity),
+    [packages, selectedCity],
+  );
 
-  const activeCity =
-    UMRAH_CITIES.find((c) => c.id === activeCityId) ?? UMRAH_CITIES[0];
+  const ratingCounts = useMemo(() => {
+    const counts: Record<RatingId, number> = { all: 0, "5": 0, "4": 0, "3": 0 };
+    for (const tab of RATING_TABS) {
+      counts[tab.id] = cityFiltered.filter((p) =>
+        matchesRating(p.stars, tab.id),
+      ).length;
+    }
+    return counts;
+  }, [cityFiltered]);
+
+  const visiblePackages = useMemo(
+    () => cityFiltered.filter((p) => matchesRating(p.stars, activeRating)),
+    [cityFiltered, activeRating],
+  );
+
+  const totalPackages = packages.length;
+  const fromPrice = lowestPriceDisplay(packages);
 
   // "View Details" modal state; focus returns to the trigger on close.
   const [details, setDetails] = useState<{
@@ -386,13 +544,17 @@ export function UmrahPage() {
 
   const openDetails = (pkg: UmrahPackage, trigger: HTMLElement) => {
     detailsTriggerRef.current = trigger;
-    setDetails({ pkg, cityName: activeCity.city });
+    const cityName = (pkg as FlatPackage).city ?? "";
+    setDetails({ pkg, cityName });
   };
   const closeDetails = useCallback(() => {
     setDetails(null);
     detailsTriggerRef.current?.focus();
     detailsTriggerRef.current = null;
   }, []);
+
+  const activeTabLabel =
+    RATING_TABS.find((t) => t.id === activeRating)?.label ?? "Packages";
 
   return (
     <>
@@ -411,29 +573,31 @@ export function UmrahPage() {
             <span className="sep">/</span>
             <span>Umrah</span>
           </div>
-          <div className="dp-hero-eyebrow">September departures</div>
+          <div className="dp-hero-eyebrow">Fully-priced packages</div>
           <h1 className="dp-hero-title">
             Umrah Packages,
             <br />
             <em>Fully Priced</em>
           </h1>
           <p className="dp-hero-sub">
-            Curated Umrah packages departing from Perth, Melbourne, and Sydney —
-            five-star and 5/4-star hotels steps from the Haram and Masjid
-            al-Nabawi. Choose your departure city and book direct with our
-            specialists.
+            Curated Umrah packages across 5-, 4- and 3-star hotels steps from
+            the Haram and Masjid al-Nabawi. Filter by hotel rating, then choose
+            your departure city and book direct with our specialists.
           </p>
           <div className="dp-hero-meta-row">
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
-              <strong>{totalPackages}</strong> curated packages
+              <strong>{status === "ready" ? totalPackages : "—"}</strong>{" "}
+              curated packages
             </div>
             <div className="dp-hero-meta-item">
-              <div className="dp-hero-meta-dot"></div>From <strong>{fromPrice}</strong>
+              <div className="dp-hero-meta-dot"></div>From{" "}
+              <strong>{status === "ready" && fromPrice ? fromPrice : "—"}</strong>
             </div>
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
-              <strong>3</strong> departure cities
+              <strong>{status === "ready" ? cityOptions.length : "—"}</strong>{" "}
+              departure cities
             </div>
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
@@ -474,73 +638,120 @@ export function UmrahPage() {
         </div>
       </div>
 
-      {/* PACKAGES — TABBED BY DEPARTURE CITY */}
+      {/* PACKAGES — FILTERED BY HOTEL RATING + DEPARTURE CITY */}
       <div className="um-page-body">
-        <div className="um-tabs-wrap" ref={tabsRef}>
-          <div className="um-tabs" role="tablist" aria-label="Departure city">
-            {UMRAH_CITIES.map((city, i) => (
-              <button
-                key={city.id}
-                ref={(el) => {
-                  tabRefs.current[i] = el;
-                }}
-                type="button"
-                role="tab"
-                id={`um-tab-${city.id}`}
-                aria-selected={city.id === activeCity.id}
-                // Only the active panel is mounted, so only the selected tab
-                // gets aria-controls — its target is the panel's bare city id
-                // (kept bare for the /umrah#perth nav anchors).
-                aria-controls={city.id === activeCity.id ? city.id : undefined}
-                tabIndex={city.id === activeCity.id ? 0 : -1}
-                className={`um-tab ${city.id === activeCity.id ? "active" : ""}`}
-                onClick={() => setActiveCityId(city.id)}
-                onKeyDown={(e) => onTabKeyDown(e, i)}
-              >
-                {city.city}
-                <span className="um-tab-count">{city.packages.length}</span>
-              </button>
-            ))}
+        {status === "loading" && (
+          <div className="um-city um-tab-panel">
+            <div className="um-city-head">
+              <h2 className="um-city-title">Loading packages…</h2>
+            </div>
+            <SkeletonGrid />
           </div>
-        </div>
+        )}
 
-        {/* key remounts the panel so the fade/slide-in replays on tab switch */}
-        <section
-          key={activeCity.id}
-          id={activeCity.id}
-          role="tabpanel"
-          aria-labelledby={`um-tab-${activeCity.id}`}
-          className="um-city um-tab-panel"
-        >
-          <div className="um-city-head">
-            <h2 className="um-city-title">From {activeCity.city}</h2>
-            <span className="um-city-meta">
-              {activeCity.packages.length} packages · September departures
-            </span>
+        {status === "error" && (
+          <div className="um-city um-tab-panel">
+            <div className="um-empty">
+              <span className="um-empty-icon" aria-hidden="true">
+                ⚠️
+              </span>
+              <p>Unable to load packages. Please try again.</p>
+            </div>
           </div>
-          {activeCity.packages.length === 0 ? (
+        )}
+
+        {status === "ready" && packages.length === 0 && (
+          <div className="um-city um-tab-panel">
             <div className="um-empty">
               <span className="um-empty-icon" aria-hidden="true">
                 🕋
               </span>
-              <p>
-                No packages available for {activeCity.city} yet — check back
-                soon.
-              </p>
+              <p>No packages available right now — please check back soon.</p>
             </div>
-          ) : (
-            <div className="um-grid">
-              {activeCity.packages.map((pkg) => (
-                <UmrahPackageCard
-                  key={pkg.id}
-                  cityName={activeCity.city}
-                  pkg={pkg}
-                  onDetails={openDetails}
-                />
-              ))}
+          </div>
+        )}
+
+        {status === "ready" && packages.length > 0 && (
+          <>
+            {/* Rating tabs + city dropdown */}
+            <div className="um-filter-bar" ref={tabsRef}>
+              <div className="um-tabs" role="tablist" aria-label="Hotel rating">
+                {RATING_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab.id === activeRating}
+                    className={`um-tab ${
+                      tab.id === activeRating ? "active" : ""
+                    }`}
+                    onClick={() => setActiveRating(tab.id)}
+                  >
+                    {tab.label}
+                    <span className="um-tab-count">{ratingCounts[tab.id]}</span>
+                  </button>
+                ))}
+              </div>
+
+              <label className="um-city-select">
+                <span className="um-city-select-label">City</span>
+                <select
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  aria-label="Filter by departure city"
+                >
+                  <option value="">All cities</option>
+                  {cityOptions.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-          )}
-        </section>
+
+            {/* key remounts the panel so the fade/slide-in replays on filter change */}
+            <section
+              key={`${activeRating}-${selectedCity}`}
+              className="um-city um-tab-panel"
+            >
+              <div className="um-city-head">
+                <h2 className="um-city-title">
+                  {activeTabLabel}
+                  {selectedCity ? ` from ${selectedCity}` : ""}
+                </h2>
+                <span className="um-city-meta">
+                  {visiblePackages.length}{" "}
+                  {visiblePackages.length === 1 ? "package" : "packages"}
+                </span>
+              </div>
+              {visiblePackages.length === 0 ? (
+                <div className="um-empty">
+                  <span className="um-empty-icon" aria-hidden="true">
+                    🕋
+                  </span>
+                  <p>
+                    No {activeRating === "all" ? "" : `${activeRating}-star `}
+                    packages
+                    {selectedCity ? ` from ${selectedCity}` : ""} right now —
+                    try another filter.
+                  </p>
+                </div>
+              ) : (
+                <div className="um-grid">
+                  {visiblePackages.map((pkg) => (
+                    <UmrahPackageCard
+                      key={pkg.id}
+                      cityName={pkg.city}
+                      pkg={pkg}
+                      onDetails={openDetails}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </div>
 
       {details && (
@@ -550,26 +761,6 @@ export function UmrahPage() {
           onClose={closeDetails}
         />
       )}
-
-      {/* NEWSLETTER */}
-      <div className="nl-section">
-        <div className="nl-inner">
-          <div className="nl-eyebrow">Plan your sacred journey</div>
-          <h2 className="nl-title">Speak to an Umrah Specialist</h2>
-          <p className="nl-sub">
-            Our team will tailor your dates, hotels, and occupancy — and hold
-            your price while you decide.
-          </p>
-          <form className="nl-form" onSubmit={(e) => e.preventDefault()}>
-            <input
-              className="nl-input"
-              type="email"
-              placeholder="Enter your email address"
-            />
-            <button type="submit">Get in touch ↗</button>
-          </form>
-        </div>
-      </div>
     </>
   );
 }

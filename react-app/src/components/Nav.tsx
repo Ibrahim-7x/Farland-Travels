@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useScrollSolid } from "../hooks/useScrollSolid";
-import { DESTINATIONS } from "../data/destinations";
-import { UMRAH_CITIES } from "../data/umrah";
+import type { Destination } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
+import { UMRAH_CATEGORIES } from "../data/umrahHome";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? "active" : undefined;
@@ -82,7 +83,7 @@ const DEAL_CATEGORY_CHIPS: FilterPill[] = [
   { label: "Wellness", to: "/deals?cat=wellness", emoji: "🧘" },
 ];
 
-function dealDuration(d: (typeof DESTINATIONS)[number]): string {
+function dealDuration(d: Destination): string {
   const first = d.metaItems?.[0];
   if (first && /^\d+/.test(first.strong)) {
     return `${first.strong} ${first.rest}`;
@@ -92,8 +93,11 @@ function dealDuration(d: (typeof DESTINATIONS)[number]): string {
 
 export function Nav() {
   const solid = useScrollSolid(60);
+  const { destinations } = useDestinations();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<DropdownKey>(null);
+  // Active Umrah category in the mega-dropdown (left rail → right preview).
+  const [umrahCat, setUmrahCat] = useState<string>(UMRAH_CATEGORIES[0].id);
   const navRef = useRef<HTMLElement | null>(null);
   const closeTimerRef = useRef<number | null>(null);
   const navigate = useNavigate();
@@ -209,7 +213,7 @@ export function Nav() {
   );
 
   const renderDealsMega = () => {
-    const visibleDeals = DESTINATIONS.slice(0, 8);
+    const visibleDeals = destinations.slice(0, 8);
     return (
       <div
         className={`mega-dropdown mega-deals ${
@@ -222,7 +226,7 @@ export function Nav() {
       >
         <div className="mega-inner">
           <div className="mega-eyebrow">
-            Featured Deals · {DESTINATIONS.length} curated packages
+            Featured Deals · {destinations.length} curated packages
           </div>
 
           <div className="deals-mega-cats">
@@ -278,7 +282,7 @@ export function Nav() {
               View all deals →
             </Link>
             <span className="mega-footer-meta">
-              Fully protected · transparent pricing · no booking fees
+              Transparent pricing · no booking fees
             </span>
           </div>
         </div>
@@ -286,85 +290,87 @@ export function Nav() {
     );
   };
 
-  const renderUmrahMega = () => (
-    <div
-      className={`mega-dropdown mega-umrah ${
-        openDropdown === "umrah" ? "open" : ""
-      }`}
-      onMouseEnter={cancelClose}
-      onMouseLeave={scheduleClose}
-      role="menu"
-      aria-hidden={openDropdown !== "umrah"}
-    >
-      <div className="mega-inner">
-        <div className="umrah-mega-layout">
-          {/* Left promo panel */}
-          <div className="umrah-mega-promo">
-            <span className="umrah-mega-icon" aria-hidden="true">🕋</span>
-            <div className="umrah-mega-promo-title">Umrah 2026</div>
-            <p className="umrah-mega-promo-sub">
-              Fully-priced packages departing from Perth, Melbourne &amp; Sydney
-            </p>
-            <ul className="umrah-mega-trust">
-              <li>✓ Steps from the Haram</li>
-              <li>✓ Return flights included</li>
-              <li>✓ Quad to double rooms</li>
-            </ul>
-            <Link
-              to="/umrah"
-              className="umrah-mega-cta"
-              onClick={() => setOpenDropdown(null)}
-            >
-              View all packages →
-            </Link>
-          </div>
-
-          {/* City summary cards */}
-          <div className="umrah-mega-cities">
-            {UMRAH_CITIES.map((city) => {
-              const fromPkg = city.packages.reduce(
-                (lo, p) => (p.price < lo.price ? p : lo),
-                city.packages[0],
-              );
-              const tiers = [
-                ...new Set(city.packages.flatMap((p) => (p.tier ? [p.tier] : []))),
-              ];
-              const to = `/umrah#${city.id}`;
-              return (
-                <a
-                  key={city.id}
-                  href={to}
-                  className="umrah-mega-city"
-                  onClick={(e) => handleNav(e, to)}
+  const renderUmrahMega = () => {
+    const activeCat =
+      UMRAH_CATEGORIES.find((c) => c.id === umrahCat) ?? UMRAH_CATEGORIES[0];
+    return (
+      <div
+        className={`mega-dropdown mega-umrah ${
+          openDropdown === "umrah" ? "open" : ""
+        }`}
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+        role="menu"
+        aria-hidden={openDropdown !== "umrah"}
+      >
+        <div className="mega-inner">
+          <div className="umrah-mega-layout">
+            {/* Left rail — category headings. Hover/click swaps the right
+                preview without navigating (page never refreshes). */}
+            <div className="umrah-mega-rail" role="tablist" aria-label="Umrah categories">
+              {UMRAH_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={cat.id === activeCat.id}
+                  className={`umrah-mega-rail-item ${
+                    cat.id === activeCat.id ? "active" : ""
+                  }`}
+                  onMouseEnter={() => setUmrahCat(cat.id)}
+                  onFocus={() => setUmrahCat(cat.id)}
+                  onClick={() => setUmrahCat(cat.id)}
                 >
-                  <div className="umrah-mega-city-name">{city.city}</div>
-                  <div className="umrah-mega-city-count">
-                    {city.packages.length} packages · September
-                  </div>
-                  <div className="umrah-mega-city-price">
-                    From {fromPkg.priceDisplay}
-                  </div>
-                  <div className="umrah-mega-city-tiers">
-                    {tiers.map((tier) => (
-                      <span
-                        key={tier}
-                        className={`umrah-mega-tier umrah-tier-${tier.toLowerCase()}`}
-                      >
-                        {tier}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="umrah-mega-city-link">
-                    Browse {city.city} →
-                  </span>
-                </a>
-              );
-            })}
+                  {cat.label}
+                  <span className="umrah-mega-rail-caret" aria-hidden="true">›</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Right preview — top 3 packages for the active category. */}
+            <div className="umrah-mega-preview">
+              <div className="umrah-mega-preview-head">
+                <span className="umrah-mega-preview-title">{activeCat.label}</span>
+                <Link
+                  to={`/umrah#${activeCat.id}`}
+                  className="umrah-mega-preview-all"
+                  onClick={() => setOpenDropdown(null)}
+                >
+                  View all →
+                </Link>
+              </div>
+              <div className="umrah-mega-grid">
+                {activeCat.packages.slice(0, 3).map((pkg) => (
+                  <a
+                    key={pkg.id}
+                    href={`/umrah#${activeCat.id}`}
+                    className="umrah-mega-pkg"
+                    onClick={(e) => handleNav(e, `/umrah#${activeCat.id}`)}
+                  >
+                    <div className="umrah-mega-pkg-thumb">
+                      <img src={pkg.image} alt={pkg.name} loading="lazy" />
+                      {pkg.badge && (
+                        <span className="umrah-mega-pkg-badge">{pkg.badge}</span>
+                      )}
+                    </div>
+                    <div className="umrah-mega-pkg-body">
+                      <div className="umrah-mega-pkg-region">{pkg.regionLabel}</div>
+                      <div className="umrah-mega-pkg-name">{pkg.name}</div>
+                      <div className="umrah-mega-pkg-meta">
+                        <span>{pkg.nights}</span>
+                        <span className="umrah-mega-pkg-dot">·</span>
+                        <span>from {pkg.fromPrice}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <nav id="site-nav" className={navClassName} ref={navRef}>

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { DESTINATIONS } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
 import "./DealsPage.css";
 
 const CATEGORIES = [
-  { value: "all", label: `All Deals (${DESTINATIONS.length})` },
+  { value: "all", label: "All Deals" },
   { value: "beach", label: "🏖 Beach & Islands" },
   { value: "culture", label: "🏛 Cultural & Heritage" },
   { value: "family", label: "👨‍👩‍👧 Family" },
@@ -13,8 +13,6 @@ const CATEGORIES = [
   { value: "cruise", label: "🛳 Cruise" },
 ];
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
 function parsePrice(s: string): number {
   return Number(s.replace(/[^0-9.]/g, "")) || 0;
 }
@@ -22,10 +20,20 @@ function parsePrice(s: string): number {
 type SortValue = "popular" | "price-asc" | "price-desc" | "alpha";
 
 export function DealsPage() {
+  const { destinations } = useDestinations();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCat = (searchParams.get("cat") ?? "all").toLowerCase();
 
-  const [secs, setSecs] = useState(18 * 3600 + 42 * 60 + 7);
+  const cheapestDeal = useMemo(
+    () =>
+      destinations.length
+        ? destinations.reduce((lo, d) =>
+            parsePrice(d.fromPrice) < parsePrice(lo.fromPrice) ? d : lo,
+          )
+        : null,
+    [destinations],
+  );
+
   const [activeCat, setActiveCat] = useState(initialCat);
   const [sort, setSort] = useState<SortValue>("popular");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -47,22 +55,13 @@ export function DealsPage() {
   };
 
   useEffect(() => {
-    const id = setInterval(() => setSecs((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 3200);
     return () => clearTimeout(t);
   }, [toast]);
 
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
-
   const filtered = useMemo(() => {
-    let list = DESTINATIONS.filter((d) => {
+    let list = destinations.filter((d) => {
       if (activeCat === "all") return true;
       const styles = d.styles.map((s) => s.toLowerCase());
       return styles.includes(activeCat);
@@ -74,7 +73,7 @@ export function DealsPage() {
     else if (sort === "alpha")
       list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [activeCat, sort]);
+  }, [destinations, activeCat, sort]);
 
   const toggleWish = (id: string) =>
     setWishlist((p) => {
@@ -103,7 +102,7 @@ export function DealsPage() {
           </div>
           <div className="dp-hero-eyebrow">Live published prices</div>
           <h1 className="dp-hero-title">
-            Four Curated Journeys,
+            Curated Journeys,
             <br />
             <em>Fully Priced</em>
           </h1>
@@ -114,11 +113,14 @@ export function DealsPage() {
           <div className="dp-hero-meta-row">
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
-              <strong>{DESTINATIONS.length}</strong> curated packages
+              <strong>{destinations.length}</strong> curated packages
             </div>
-            <div className="dp-hero-meta-item">
-              <div className="dp-hero-meta-dot"></div>From <strong>AUD $2,088</strong>
-            </div>
+            {cheapestDeal && (
+              <div className="dp-hero-meta-item">
+                <div className="dp-hero-meta-dot"></div>From{" "}
+                <strong>{cheapestDeal.fromPrice}</strong>
+              </div>
+            )}
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
               <strong>fully protected</strong>
@@ -126,37 +128,6 @@ export function DealsPage() {
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>No <strong>booking fees</strong>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* COUNTDOWN */}
-      <div className="countdown-strip">
-        <div className="countdown-inner">
-          <div className="countdown-left">
-            <div className="pulse-dot"></div>
-            <span className="countdown-label">Flash sale ends in</span>
-            <div className="timer-blocks">
-              <div className="t-block">
-                <strong>{pad(h)}</strong>
-                <small>hrs</small>
-              </div>
-              <span className="t-sep">:</span>
-              <div className="t-block">
-                <strong>{pad(m)}</strong>
-                <small>min</small>
-              </div>
-              <span className="t-sep">:</span>
-              <div className="t-block">
-                <strong>{pad(s)}</strong>
-                <small>sec</small>
-              </div>
-            </div>
-          </div>
-          <div className="countdown-right">
-            <span className="deal-tally">
-              Prices held until <strong>midnight</strong> tonight
-            </span>
           </div>
         </div>
       </div>
@@ -171,7 +142,7 @@ export function DealsPage() {
               className={`cat-tab ${activeCat === c.value ? "active" : ""}`}
               onClick={() => selectCategory(c.value)}
             >
-              {c.label}
+              {c.value === "all" ? `${c.label} (${destinations.length})` : c.label}
             </button>
           ))}
         </div>
@@ -196,12 +167,6 @@ export function DealsPage() {
             <span className="trust-icon">☎</span>
             <div>
               <strong>24/7 Support</strong>On-trip assistance always
-            </div>
-          </div>
-          <div className="trust-item">
-            <span className="trust-icon">⭐</span>
-            <div>
-              <strong>4.9 Trustpilot</strong>12,400+ happy travellers
             </div>
           </div>
           <div className="trust-item">
@@ -251,6 +216,31 @@ export function DealsPage() {
               </div>
             </div>
           </div>
+
+          {filtered.length === 0 && (
+            <div className="deals-empty">
+              <div className="deals-empty-icon" aria-hidden="true">
+                🧭
+              </div>
+              <h2>No live deals in this category yet</h2>
+              <p>
+                Tell us what you're after and our specialists will craft a
+                journey around it — or browse everything we currently run.
+              </p>
+              <div className="deals-empty-actions">
+                <Link to="/contact#inquiry-section" className="btn btn-gold">
+                  Tell us what you're after →
+                </Link>
+                <button
+                  type="button"
+                  className="btn btn-outline-navy"
+                  onClick={() => selectCategory("all")}
+                >
+                  View all deals
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className={`dp-deals-grid ${view === "list" ? "lv" : ""}`}>
             {filtered.map((d) => {
@@ -381,32 +371,6 @@ export function DealsPage() {
               );
             })}
           </div>
-        </div>
-      </div>
-
-      {/* NEWSLETTER */}
-      <div className="nl-section">
-        <div className="nl-inner">
-          <div className="nl-eyebrow">Get exclusive deals first</div>
-          <h2 className="nl-title">Never Miss a Price Drop</h2>
-          <p className="nl-sub">
-            Join 45,000+ subscribers who get early access to seasonal offers — delivered
-            to their inbox before anyone else.
-          </p>
-          <form className="nl-form" onSubmit={(e) => e.preventDefault()}>
-            <input className="nl-input" type="email" placeholder="Enter your email address" />
-            <button type="submit">Subscribe ↗</button>
-          </form>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 11,
-              color: "rgba(255,255,255,.3)",
-              marginTop: 14,
-            }}
-          >
-            No spam. Unsubscribe any time. Your data is never sold.
-          </p>
         </div>
       </div>
 

@@ -56,7 +56,10 @@
 }
 
 /* ─── DESTINATIONS ─── */
-#destinations{padding:clamp(72px,8vw,112px) clamp(20px,5vw,60px)}
+#destinations,#umrah-home{padding:clamp(72px,8vw,112px) clamp(20px,5vw,60px)}
+/* Umrah teaser sits directly above Destinations — drop its bottom padding
+   so the two sections read as one continuous block. */
+#umrah-home{padding-bottom:0}
 .destinations-inner{max-width:1280px;margin:0 auto}
 .destinations-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;flex-wrap:wrap;gap:20px}
 .dest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -98,22 +101,12 @@
 .deals-inner .section-eyebrow{color:var(--gold)}
 .deals-inner .section-eyebrow::before{background:var(--gold)}
 .deals-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:48px;flex-wrap:wrap;gap:16px}
-.countdown-bar{display:flex;align-items:center;gap:10px;background:rgba(13,110,253,.12);border:1px solid rgba(13,110,253,.2);border-radius:var(--r-pill);padding:8px 16px}
-.countdown-bar span.label{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0;line-height:1}
-.countdown-timer{display:flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums}
-.time-block{display:flex;flex-direction:column;align-items:center;text-align:center}
-.time-block strong{display:block;font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--white);line-height:1}
-.time-block small{font-family:var(--font-body);font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.02em;line-height:1;margin-top:2px}
-.time-sep{font-family:var(--font-display);font-size:20px;color:rgba(255,255,255,.25);line-height:1;align-self:center;margin-top:0}
 .deals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:900px){.deals-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.deals-grid{grid-template-columns:1fr}}
 @media(max-width:520px){
   .deals-header{align-items:flex-start}
   .deals-header>div{width:100%}
-  .countdown-bar{width:100%;justify-content:center;flex-wrap:wrap;gap:6px}
-  .countdown-bar span.label{width:100%;text-align:center}
-  .countdown-timer{justify-content:center}
 }
 
 .deal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-lg);overflow:hidden;transition:all .4s var(--ease);cursor:pointer}
@@ -159,44 +152,12 @@
 .why-feature-text h4{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px}
 .why-feature-text p{font-family:var(--font-body);font-size:12px;color:var(--stone-dark);line-height:1.6}
 
-/* ─── TESTIMONIALS ─── */
-#testimonials{padding:clamp(72px,8vw,112px) clamp(20px,5vw,60px);background:var(--ivory-mid)}
-.testimonials-inner{max-width:1280px;margin:0 auto}
-.testimonials-header{text-align:center;margin-bottom:56px}
-.testimonials-header .section-eyebrow{justify-content:center}
-.testimonials-header .section-eyebrow::before{display:none}
-.testimonials-header .section-eyebrow::after{content:'';width:28px;height:1px;background:var(--gold)}
-.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-@media(max-width:900px){.testi-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.testi-grid{grid-template-columns:1fr}}
-
-.testi-card{background:var(--white);border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow-sm);transition:all .4s var(--ease);position:relative}
-.testi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.testi-card.highlight{background:var(--navy-grad);border:1px solid rgba(13,110,253,.2)}
-.testi-quote-mark{font-family:var(--font-display);font-size:64px;font-weight:700;line-height:.7;color:var(--gold-pale);position:absolute;top:18px;right:22px}
-.testi-card.highlight .testi-quote-mark{color:rgba(13,110,253,.15)}
-.testi-stars{display:flex;gap:3px;margin-bottom:14px}
-.testi-star{color:var(--gold);font-size:13px}
-.testi-text{font-family:var(--font-display);font-size:14px;font-weight:400;font-style:italic;color:var(--navy);line-height:1.5;margin-bottom:20px}
-.testi-card.highlight .testi-text{color:var(--white)}
-.testi-dest-tag{display:inline-flex;align-items:center;gap:6px;background:var(--gold-pale);border-radius:var(--r-pill);padding:4px 12px;margin-bottom:18px}
-.testi-card.highlight .testi-dest-tag{background:rgba(13,110,253,.15)}
-.testi-dest-tag span{font-family:var(--font-body);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone-dark)}
-.testi-card.highlight .testi-dest-tag span{color:var(--gold-light)}
-.testi-author{display:flex;align-items:center;gap:12px;border-top:1px solid var(--ivory-mid);padding-top:16px}
-.testi-card.highlight .testi-author{border-top-color:rgba(255,255,255,.08)}
-.testi-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-pale)}
-.testi-author-info h5{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--navy)}
-.testi-card.highlight .testi-author-info h5{color:var(--white)}
-.testi-author-info small{font-family:var(--font-body);font-size:11px;color:var(--stone-dark)}
-.testi-card.highlight .testi-author-info small{color:rgba(255,255,255,.4)}
-.testi-platform{position:absolute;bottom:28px;right:28px;font-family:var(--font-body);font-size:10px;font-weight:600;color:var(--stone);letter-spacing:.02em}
-.testi-card.highlight .testi-platform{color:rgba(255,255,255,.2)}
-.trustpilot-bar{margin-top:48px;display:flex;justify-content:center;align-items:center;gap:40px;flex-wrap:wrap;padding:28px;background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+/* .trust-item base styles: no longer used on the homepage itself, but the
+   Deals/Umrah trust strips inherit font-family/text-align from these via the
+   global cascade — remove only together with a check of DealsPage.css. */
 .trust-item{text-align:center}
 .trust-item strong{display:block;font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--navy)}
 .trust-item span{font-family:var(--font-body);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--stone-dark)}
-.trust-divider{width:1px;height:40px;background:var(--ivory-mid)}
 
 /* ─── CTA BANNER ─── */
 #cta-banner{position:relative;overflow:hidden}
@@ -213,32 +174,12 @@
 .cta-feature::before{content:'✓';color:var(--gold);font-weight:600}
 .cta-btns{display:flex;gap:14px;flex-wrap:wrap}
 
-/* ─── NEWSLETTER ─── */
-#newsletter{padding:clamp(72px,8vw,100px) clamp(20px,5vw,60px);background:var(--ivory)}
-.newsletter-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-@media(max-width:760px){.newsletter-inner{grid-template-columns:1fr;gap:40px}}
-.newsletter-perks{display:flex;flex-direction:column;gap:16px;margin-top:32px}
-.perk{display:flex;align-items:flex-start;gap:14px}
-.perk-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.perk-text h5{font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px}
-.perk-text p{font-family:var(--font-body);font-size:12px;color:var(--stone-dark);line-height:1.5}
-.newsletter-form{background:var(--white);border-radius:var(--r-xl);padding:40px 36px;box-shadow:var(--shadow-md)}
-.newsletter-form-title{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--navy);margin-bottom:6px}
-.newsletter-form-sub{font-family:var(--font-body);font-size:13px;color:var(--stone-dark);margin-bottom:28px;line-height:1.6}
+/* Generic form rules: other pages' forms (Contact, detail/search enquiry)
+   pick up base properties from these via the global cascade — keep them
+   even though the homepage itself no longer renders a matching form. */
 .form-group{margin-bottom:16px}
 .form-group label{display:block;font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--stone-dark);margin-bottom:6px}
 .form-group input,.form-group select{width:100%;padding:13px 16px;border:1.5px solid var(--ivory-mid);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;color:var(--navy);background:var(--ivory);outline:none;transition:border-color .2s,box-shadow .2s}
 .form-group input:focus,.form-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(13,110,253,.12);background:var(--white)}
 .form-group input::placeholder{color:var(--stone)}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.form-consent{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px}
-.form-consent input{width:16px;height:16px;accent-color:var(--gold);flex-shrink:0;margin-top:2px}
-.form-consent span{font-family:var(--font-body);font-size:11px;color:var(--stone-dark);line-height:1.5}
-.form-consent a{color:var(--gold)}
-.newsletter-note{font-family:var(--font-body);font-size:11px;color:var(--text-muted);margin-top:12px;text-align:center}
-.newsletter-social-proof{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:center}
-.sp-avatars{display:flex}
-.sp-avatars img{width:26px;height:26px;border-radius:50%;border:2px solid var(--white);margin-right:-6px;object-fit:cover}
-.sp-avatars img:last-child{margin-right:0}
-.sp-text{font-family:var(--font-body);font-size:11px;color:var(--stone-dark);margin-left:10px}
-.sp-text strong{color:var(--navy)}

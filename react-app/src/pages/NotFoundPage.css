@@ -1,0 +1,9 @@
+/* Dark hero treatment so the fixed transparent nav stays legible,
+   matching how every other page opens. */
+.nf-hero{min-height:78vh;background:var(--navy-grad);display:flex;align-items:center;justify-content:center;text-align:center;padding:140px clamp(20px,5vw,60px) 100px}
+.nf-content{max-width:560px}
+.nf-eyebrow{font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.nf-title{font-family:var(--font-display);font-size:clamp(36px,6vw,56px);font-weight:300;color:var(--white);line-height:1.1;margin-bottom:14px}
+.nf-title em{font-style:italic;color:var(--gold)}
+.nf-sub{font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:32px}
+.nf-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
