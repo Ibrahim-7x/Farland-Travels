@@ -2,8 +2,10 @@
 
 Express + TypeScript + MySQL backend for the Farland Travels site. Designed to
 run on Namecheap shared cPanel via Passenger ("Setup Node.js App") on **Node 18**.
-Umrah packages, reviews, enquiries, site settings, and the privacy/terms content
-are stored in MySQL; destinations and deals stay static in the frontend.
+Umrah packages, holiday deals/destinations, reviews, enquiries, site settings,
+and the privacy/terms content are stored in MySQL and managed from the admin
+panel; admin-uploaded images are stored on disk and served from `/api/uploads`.
+(The destination *browse* city grid is still static in the frontend.)
 
 ---
 
@@ -16,7 +18,7 @@ npm install
 cp .env.example .env          # then fill in values (see "Environment" below)
 docker compose -f docker-compose.dev.yml up -d   # local MySQL 8 on :3306
 npm run migrate               # create tables (idempotent)
-npm run seed                  # admin user, 12 packages, sample reviews, settings, content
+npm run seed                  # admin user, cities, 18 packages, sample reviews, settings, content
 npm run dev                   # API on http://localhost:3001
 
 # 2. In a separate terminal — frontend
@@ -53,6 +55,7 @@ Open http://localhost:5173 (public site) and http://localhost:5173/admin
 | `DB_PASSWORD`    | **yes\*** | MySQL password (may be empty locally; `*` empty allowed).                                |
 | `DB_NAME`        | **yes**  | Database name.                                                                            |
 | `JWT_SECRET`     | **yes**  | Secret for signing admin session JWTs. Min 16 chars — use a long random string.          |
+| `UPLOADS_DIR`    | no       | Where admin-uploaded images are written/served (`/api/uploads`). Default `<server>/uploads`. In prod use an absolute path **outside** the deploy folder so redeploys don't wipe media. |
 | `SMTP_HOST`      | no       | SMTP host for enquiry notifications. **If unset, enquiries are still stored** (no email). |
 | `SMTP_PORT`      | no (587) | SMTP port (465 ⇒ implicit TLS).                                                           |
 | `SMTP_USER`      | no       | SMTP username; also used as the `from` address.                                          |
@@ -84,6 +87,8 @@ server/
       migrate.ts               transactional migration runner (migrations_log) + runMigrations()
       seed.ts                  seed CLI entrypoint
       mappers.ts               DB row → camelCase API shapes
+    config/
+      uploads.ts               resolves UPLOADS_DIR + ensures it exists
     migrations/
       001_admin_users.sql
       002_umrah_packages.sql   (stars/nights/*_nights are VARCHAR — see note below)
@@ -91,12 +96,15 @@ server/
       004_enquiries.sql
       005_site_settings.sql
       006_site_content.sql
+      007_cities.sql           admin-managed Umrah departure-city list
+      008_destinations.sql     holiday deals/destinations (scalars + JSON sections)
     seeds/
-      umrah-data.ts            12 packages, moved verbatim from the frontend
-      index.ts                 seedAll(): admin, packages, reviews, settings, content
+      umrah-data.ts            18 packages across 5 cities, moved from the frontend
+      destinations-data.ts     3 holiday deals, moved from the frontend
+      index.ts                 seedAll(): admin, cities, packages, destinations, reviews, settings, content
     routes/
-      public/                  umrah.ts reviews.ts content.ts settings.ts enquiries.ts
-      admin/                   auth.ts packages.ts reviews.ts enquiries.ts content.ts settings.ts
+      public/                  umrah.ts destinations.ts cities.ts reviews.ts content.ts settings.ts enquiries.ts
+      admin/                   auth.ts packages.ts destinations.ts uploads.ts cities.ts reviews.ts enquiries.ts content.ts settings.ts
     middleware/
       auth.ts                  verifyJWT (httpOnly SameSite cookie) + issue/clear helpers
       rateLimiter.ts           auth (5/15m) + enquiry (10/15m) limiters
@@ -122,15 +130,18 @@ server/
 
 ## API surface (all under `/api`)
 
-**Public:** `GET /umrah-packages`, `GET /reviews`, `GET /content/:key`
-(`privacy_policy`|`terms`), `GET /settings/public` (never exposes `abn`),
-`POST /enquiries` (zod + honeypot + rate limit).
+**Public:** `GET /umrah-packages`, `GET /destinations`, `GET /destinations/:slug`,
+`GET /cities`, `GET /reviews`, `GET /content/:key` (`privacy_policy`|`terms`),
+`GET /settings/public` (never exposes `abn`), `POST /enquiries`
+(zod + honeypot + rate limit). Uploaded images are served at `GET /uploads/:file`.
 
 **Auth:** `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`,
 `POST /auth/change-password`.
 
-**Admin (JWT required):** `/admin/umrah-packages` (CRUD + `PATCH /:id/publish`,
-`POST /:id/duplicate`, `POST /reorder`), `/admin/reviews` (CRUD + publish),
+**Admin (JWT required):** `/admin/umrah-packages` and `/admin/destinations`
+(both: CRUD + `PATCH /:id/publish`, `POST /:id/duplicate`, `POST /reorder`),
+`POST /admin/uploads` (multipart `image` → WebP, returns `{ url }`),
+`/admin/cities` (list/add/remove), `/admin/reviews` (CRUD + publish),
 `/admin/enquiries` (list/detail/`PATCH /:id/status`), `/admin/content/:key`
 (GET/PUT), `/admin/settings` (GET/PUT).
 
@@ -140,6 +151,11 @@ server/
 
 - Serve the built `react-app/dist` as the site root and proxy `/api` to the Node
   app so the frontend and API share one origin (CORS is locked to same-origin).
+  Uploaded images ride the same `/api` proxy (served at `/api/uploads/...`), so
+  no extra Apache rule is needed.
+- Set `UPLOADS_DIR` to an absolute path **outside** the deployed app folder
+  (e.g. `/home/<cpaneluser>/farland-uploads`) so re-deploying the app never
+  deletes uploaded media. Ensure the Passenger user can write to it.
 - Create the MySQL database + user under **MySQL Databases**, set the `DB_*`
   vars accordingly, then run `npm run migrate` and `npm run seed` once.
 - Set a strong `JWT_SECRET` and change the seeded admin password after first login.
@@ -153,6 +169,11 @@ server/
 2. **Packages → live site** — create/edit/unpublish a package in
    `/admin/packages`; reload `/umrah` and confirm the change (unpublished
    packages disappear from the public page).
+2b. **Deals → live site** — in `/admin/deals`, create a deal, **upload a card
+   image**, add a couple of monthly-pricing rows and highlights, and publish it.
+   Reload the Home, `/deals`, `/destinations` and the deal's detail page and
+   confirm it appears with its image and pricing; unpublish it and confirm it
+   disappears everywhere.
 3. **Enquiries** — submit each form (Contact wizard holiday + umrah,
    Destination detail, Search results); confirm rows appear under
    `/admin/enquiries`, and (if SMTP configured) an email arrives at

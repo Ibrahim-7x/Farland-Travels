@@ -21,6 +21,13 @@ const EnvSchema = z.object({
   // ── Auth ──
   JWT_SECRET: z.string().min(16, "JWT_SECRET must be at least 16 characters"),
 
+  // ── Uploads ──
+  // Directory where admin-uploaded images are written and served from
+  // (/api/uploads/<file>). Keep this OUTSIDE the deploy-overwrite path in
+  // production (e.g. an absolute cPanel home path) so redeploys don't wipe
+  // uploaded media. Defaults to <server>/uploads in dev.
+  UPLOADS_DIR: z.preprocess(emptyToUndefined, z.string().optional()),
+
   // ── Email (optional) ──
   SMTP_HOST: z.preprocess(emptyToUndefined, z.string().optional()),
   SMTP_PORT: z.coerce.number().int().positive().default(587),

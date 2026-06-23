@@ -6,6 +6,7 @@ import {
   getCitiesGrouped,
   type City,
 } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
 import "./DestinationsPage.css";
 
 const CONTINENT_EMOJI: Record<string, string> = {
@@ -225,7 +226,11 @@ function FilteredDealsView({
   cityName: string;
   onBack: () => void;
 }) {
-  const deals = useMemo(() => findDealsForCityName(cityName), [cityName]);
+  const { destinations } = useDestinations();
+  const deals = useMemo(
+    () => findDealsForCityName(destinations, cityName),
+    [destinations, cityName],
+  );
   const cityMeta = CITIES.find(
     (c) => c.name.toLowerCase() === cityName.toLowerCase()
   );

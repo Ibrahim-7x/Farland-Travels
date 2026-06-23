@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { DESTINATIONS } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
 import "./DealsPage.css";
 
 const CATEGORIES = [
-  { value: "all", label: `All Deals (${DESTINATIONS.length})` },
+  { value: "all", label: "All Deals" },
   { value: "beach", label: "🏖 Beach & Islands" },
   { value: "culture", label: "🏛 Cultural & Heritage" },
   { value: "family", label: "👨‍👩‍👧 Family" },
@@ -17,15 +17,22 @@ function parsePrice(s: string): number {
   return Number(s.replace(/[^0-9.]/g, "")) || 0;
 }
 
-const cheapestDeal = DESTINATIONS.reduce((lo, d) =>
-  parsePrice(d.fromPrice) < parsePrice(lo.fromPrice) ? d : lo
-);
-
 type SortValue = "popular" | "price-asc" | "price-desc" | "alpha";
 
 export function DealsPage() {
+  const { destinations } = useDestinations();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCat = (searchParams.get("cat") ?? "all").toLowerCase();
+
+  const cheapestDeal = useMemo(
+    () =>
+      destinations.length
+        ? destinations.reduce((lo, d) =>
+            parsePrice(d.fromPrice) < parsePrice(lo.fromPrice) ? d : lo,
+          )
+        : null,
+    [destinations],
+  );
 
   const [activeCat, setActiveCat] = useState(initialCat);
   const [sort, setSort] = useState<SortValue>("popular");
@@ -54,7 +61,7 @@ export function DealsPage() {
   }, [toast]);
 
   const filtered = useMemo(() => {
-    let list = DESTINATIONS.filter((d) => {
+    let list = destinations.filter((d) => {
       if (activeCat === "all") return true;
       const styles = d.styles.map((s) => s.toLowerCase());
       return styles.includes(activeCat);
@@ -66,7 +73,7 @@ export function DealsPage() {
     else if (sort === "alpha")
       list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [activeCat, sort]);
+  }, [destinations, activeCat, sort]);
 
   const toggleWish = (id: string) =>
     setWishlist((p) => {
@@ -106,12 +113,14 @@ export function DealsPage() {
           <div className="dp-hero-meta-row">
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
-              <strong>{DESTINATIONS.length}</strong> curated packages
+              <strong>{destinations.length}</strong> curated packages
             </div>
-            <div className="dp-hero-meta-item">
-              <div className="dp-hero-meta-dot"></div>From{" "}
-              <strong>{cheapestDeal.fromPrice}</strong>
-            </div>
+            {cheapestDeal && (
+              <div className="dp-hero-meta-item">
+                <div className="dp-hero-meta-dot"></div>From{" "}
+                <strong>{cheapestDeal.fromPrice}</strong>
+              </div>
+            )}
             <div className="dp-hero-meta-item">
               <div className="dp-hero-meta-dot"></div>
               <strong>fully protected</strong>
@@ -133,7 +142,7 @@ export function DealsPage() {
               className={`cat-tab ${activeCat === c.value ? "active" : ""}`}
               onClick={() => selectCategory(c.value)}
             >
-              {c.label}
+              {c.value === "all" ? `${c.label} (${destinations.length})` : c.label}
             </button>
           ))}
         </div>

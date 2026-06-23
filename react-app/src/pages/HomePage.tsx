@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { DESTINATIONS } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
+import { UMRAH_HOME_PACKAGES } from "../data/umrahHome";
 import { SearchBar } from "../components/SearchBar";
 import { Testimonials } from "../components/Testimonials";
 import { useSiteSettings, telHref } from "../contexts/siteSettings";
@@ -9,13 +10,16 @@ import "./HomePage.css";
 export function HomePage() {
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
   const { contactPhone } = useSiteSettings();
+  const { destinations } = useDestinations();
   const phoneLink = telHref(contactPhone);
 
   const toggleWish = (key: string) =>
     setWishlist((w) => ({ ...w, [key]: !w[key] }));
 
-  const [featured, ...rest] = DESTINATIONS;
-  const deals = DESTINATIONS;
+  const [featured, ...rest] = destinations;
+  const deals = destinations;
+
+  const [umrahFeatured, ...umrahRest] = UMRAH_HOME_PACKAGES;
 
   return (
     <>
@@ -31,9 +35,7 @@ export function HomePage() {
         <div className="hero-content">
           <div className="hero-badge">
             <div className="hero-dot"></div>
-            <span>
-              {DESTINATIONS.length} curated journeys · fully costed
-            </span>
+            <span>Curated journeys · fully costed</span>
           </div>
           <h1 className="hero-headline">
             The World's Most
@@ -69,12 +71,108 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* UMRAH PACKAGES — teaser, same card format as Curated Destinations */}
+      <section id="umrah-home">
+        <div className="destinations-inner">
+          <div className="destinations-header">
+            <div>
+              <h2 className="section-title">Umrah Packages</h2>
+              <p className="section-sub">
+                Fully-priced sacred journeys to Makkah &amp; Madinah — flights,
+                hotels and transfers included.
+              </p>
+            </div>
+            <Link to="/umrah" className="btn-text-gold">
+              View all Umrah packages →
+            </Link>
+          </div>
+          <div className="dest-grid">
+            {umrahFeatured && (
+              <Link
+                to="/umrah"
+                className="dest-card featured reveal"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <div className="dest-img">
+                  <img src={umrahFeatured.image} alt={umrahFeatured.name} />
+                  <div className="dest-overlay"></div>
+                  <div className="dest-img-meta">
+                    <div className="dest-region">{umrahFeatured.regionLabel}</div>
+                    <div className="dest-name">{umrahFeatured.name}</div>
+                  </div>
+                  {umrahFeatured.badge && (
+                    <div className="dest-badge">
+                      <span>{umrahFeatured.badge}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="dest-body">
+                  <p className="dest-desc">{umrahFeatured.description}</p>
+                  <div className="dest-footer">
+                    <div className="dest-price">
+                      <small>From per person</small>
+                      <strong>{umrahFeatured.fromPrice}</strong>
+                    </div>
+                    <div className="dest-tags">
+                      {umrahFeatured.tags.map((t) => (
+                        <span className="tag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {umrahRest.map((p, i) => (
+              <Link
+                key={p.id}
+                to="/umrah"
+                className={`dest-card reveal reveal-delay-${i + 1}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <div className="dest-img">
+                  <img src={p.image} alt={p.name} />
+                  <div className="dest-overlay"></div>
+                  <div className="dest-img-meta">
+                    <div className="dest-region">{p.regionLabel}</div>
+                    <div className="dest-name">{p.name}</div>
+                  </div>
+                  {p.badge && (
+                    <div className="dest-badge">
+                      <span>{p.badge}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="dest-body">
+                  <p className="dest-desc">{p.description}</p>
+                  <div className="dest-footer">
+                    <div className="dest-price">
+                      <small>From per person</small>
+                      <strong>{p.fromPrice}</strong>
+                    </div>
+                    <div className="dest-tags">
+                      {p.tags.slice(0, 2).map((t) => (
+                        <span className="tag" key={t}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* DESTINATIONS */}
       <section id="destinations">
         <div className="destinations-inner">
           <div className="destinations-header">
             <div>
-              <h2 className="section-title">Curated Destinations</h2>
+              <h2 className="section-title">Holiday Destinations</h2>
               <p className="section-sub">
                 Hand-selected journeys, each fully costed and ready to book.
               </p>

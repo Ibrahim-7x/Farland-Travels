@@ -56,7 +56,10 @@
 }
 
 /* ─── DESTINATIONS ─── */
-#destinations{padding:clamp(72px,8vw,112px) clamp(20px,5vw,60px)}
+#destinations,#umrah-home{padding:clamp(72px,8vw,112px) clamp(20px,5vw,60px)}
+/* Umrah teaser sits directly above Destinations — drop its bottom padding
+   so the two sections read as one continuous block. */
+#umrah-home{padding-bottom:0}
 .destinations-inner{max-width:1280px;margin:0 auto}
 .destinations-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;flex-wrap:wrap;gap:20px}
 .dest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}

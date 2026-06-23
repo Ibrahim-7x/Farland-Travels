@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet, apiPatch } from "../api";
+import {
+  STATUS_LABELS,
+  TYPE_LABELS,
+  formatDateTime,
+  formatRelative,
+  statusClass,
+  typeClass,
+} from "../format";
 
 type Enquiry = {
   id: number;
@@ -14,6 +22,8 @@ type Enquiry = {
   createdAt: string;
 };
 
+const STATUSES = ["new", "contacted", "closed"] as const;
+
 function humanize(key: string): string {
   return key
     .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -24,7 +34,7 @@ function humanize(key: string): string {
 function renderValue(value: unknown): string {
   if (value == null || value === "") return "—";
   if (Array.isArray(value)) return value.length ? value.join(", ") : "—";
-  if (typeof value === "object") return JSON.stringify(value);
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
   return String(value);
 }
 
@@ -52,7 +62,7 @@ export function EnquiryDetailPage() {
   }, [id]);
 
   const updateStatus = async (status: string) => {
-    if (!enquiry) return;
+    if (!enquiry || status === enquiry.status) return;
     setSaving(true);
     try {
       await apiPatch(`/admin/enquiries/${enquiry.id}/status`, { status });
@@ -74,64 +84,110 @@ export function EnquiryDetailPage() {
     );
 
   const payloadEntries = enquiry.payload ? Object.entries(enquiry.payload) : [];
+  const replySubject = encodeURIComponent(
+    `Re: your ${TYPE_LABELS[enquiry.type] ?? enquiry.type} enquiry with Farland`,
+  );
 
   return (
     <>
       <Link to="/admin/enquiries" className="admin-muted">
         ← Back to enquiries
       </Link>
-      <h1 className="admin-h1" style={{ marginTop: 8 }}>
-        {enquiry.name}
-      </h1>
-      <p className="admin-sub">
-        {enquiry.type} enquiry · {enquiry.createdAt}
-      </p>
 
-      <div className="admin-card">
-        <div className="admin-row">
-          <div className="admin-field">
-            <label>Email</label>
-            <div>
-              <a href={`mailto:${enquiry.email}`}>{enquiry.email}</a>
-            </div>
-          </div>
-          <div className="admin-field">
-            <label>Phone</label>
-            <div>{enquiry.phone || "—"}</div>
+      <div className="admin-detail-head">
+        <div>
+          <h1 className="admin-h1" style={{ marginTop: 8 }}>
+            {enquiry.name}
+          </h1>
+          <div className="admin-detail-meta">
+            <span className={typeClass(enquiry.type)}>
+              {TYPE_LABELS[enquiry.type] ?? enquiry.type}
+            </span>
+            <span className={statusClass(enquiry.status)}>
+              {STATUS_LABELS[enquiry.status] ?? enquiry.status}
+            </span>
+            <span className="admin-muted">Enquiry #{enquiry.id}</span>
+            <span className="admin-muted">
+              · {formatDateTime(enquiry.createdAt)} ({formatRelative(enquiry.createdAt)})
+            </span>
           </div>
         </div>
-        <div className="admin-row">
-          <div className="admin-field">
-            <label>Source page</label>
-            <div>{enquiry.sourcePage || "—"}</div>
-          </div>
-          <label className="admin-field">
-            <span>Status</span>
-            <select
-              className="admin-select"
-              value={enquiry.status}
-              disabled={saving}
-              onChange={(e) => updateStatus(e.target.value)}
+        <div className="admin-actions">
+          <a className="admin-btn" href={`mailto:${enquiry.email}?subject=${replySubject}`}>
+            ✉ Reply by email
+          </a>
+          {enquiry.phone && (
+            <a
+              className="admin-btn admin-btn-ghost"
+              href={`tel:${enquiry.phone.replace(/[^+\d]/g, "")}`}
             >
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="closed">Closed</option>
-            </select>
-          </label>
+              ☎ Call
+            </a>
+          )}
         </div>
       </div>
 
       <div className="admin-card">
-        <h3 style={{ marginTop: 0, color: "var(--navy)" }}>Enquiry details</h3>
+        <span className="admin-field-title">Update status</span>
+        <div className="admin-segment" role="group" aria-label="Update status">
+          {STATUSES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={`admin-segment-btn ${enquiry.status === s ? "active" : ""}`}
+              disabled={saving}
+              onClick={() => updateStatus(s)}
+            >
+              {STATUS_LABELS[s]}
+            </button>
+          ))}
+          {saving && <span className="admin-muted" style={{ marginLeft: 10 }}>Saving…</span>}
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3>Contact</h3>
+        <div className="admin-kv-grid">
+          <div className="admin-kv">
+            <span className="admin-kv-label">Email</span>
+            <a href={`mailto:${enquiry.email}`}>{enquiry.email}</a>
+          </div>
+          <div className="admin-kv">
+            <span className="admin-kv-label">Phone</span>
+            {enquiry.phone ? (
+              <a href={`tel:${enquiry.phone.replace(/[^+\d]/g, "")}`}>
+                {enquiry.phone}
+              </a>
+            ) : (
+              <span className="admin-muted">—</span>
+            )}
+          </div>
+          <div className="admin-kv">
+            <span className="admin-kv-label">Source page</span>
+            <span>{enquiry.sourcePage || "—"}</span>
+          </div>
+          <div className="admin-kv">
+            <span className="admin-kv-label">Received</span>
+            <span>{formatDateTime(enquiry.createdAt)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3>Enquiry details</h3>
         {payloadEntries.length === 0 ? (
           <p className="admin-muted">No additional details were submitted.</p>
         ) : (
-          <table className="admin-table">
+          <table className="admin-table admin-table-kv">
             <tbody>
               {payloadEntries.map(([key, value]) => (
                 <tr key={key}>
                   <th style={{ width: 220 }}>{humanize(key)}</th>
-                  <td>{renderValue(value)}</td>
+                  <td>
+                    <span style={{ whiteSpace: "pre-wrap" }}>
+                      {renderValue(value)}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

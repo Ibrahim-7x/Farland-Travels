@@ -16,6 +16,9 @@ import { EnquiriesPage } from "./pages/EnquiriesPage";
 import { EnquiryDetailPage } from "./pages/EnquiryDetailPage";
 import { PackagesPage } from "./pages/PackagesPage";
 import { PackageFormPage } from "./pages/PackageFormPage";
+import { DealsPage } from "./pages/DealsPage";
+import { DealFormPage } from "./pages/DealFormPage";
+import { CitiesPage } from "./pages/CitiesPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
 import { ContentPage } from "./pages/ContentPage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -58,12 +61,14 @@ function RequireAuth() {
 }
 
 const NAV = [
-  { to: "/admin", label: "Dashboard", end: true },
-  { to: "/admin/enquiries", label: "Enquiries", end: false },
-  { to: "/admin/packages", label: "Umrah Packages", end: false },
-  { to: "/admin/reviews", label: "Reviews", end: false },
-  { to: "/admin/content", label: "Content", end: false },
-  { to: "/admin/settings", label: "Settings", end: false },
+  { to: "/admin", label: "Dashboard", icon: "▦", end: true },
+  { to: "/admin/enquiries", label: "Enquiries", icon: "✉", end: false },
+  { to: "/admin/packages", label: "Umrah Packages", icon: "🕋", end: false },
+  { to: "/admin/deals", label: "Deals & Destinations", icon: "🌴", end: false },
+  { to: "/admin/cities", label: "Cities", icon: "📍", end: false },
+  { to: "/admin/reviews", label: "Reviews", icon: "★", end: false },
+  { to: "/admin/content", label: "Content", icon: "❏", end: false },
+  { to: "/admin/settings", label: "Settings", icon: "⚙", end: false },
 ];
 
 function AdminLayout() {
@@ -86,26 +91,35 @@ function AdminLayout() {
         <div className="admin-logo">
           Farland<span> Admin</span>
         </div>
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              isActive ? "admin-nav-link active" : "admin-nav-link"
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
+        <nav className="admin-nav">
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                isActive ? "admin-nav-link active" : "admin-nav-link"
+              }
+            >
+              <span className="admin-nav-icon" aria-hidden="true">
+                {item.icon}
+              </span>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
         <div className="admin-sidebar-spacer" />
-        <div className="admin-sidebar-email">{email}</div>
-        <button type="button" className="admin-logout" onClick={logout}>
-          Log out
-        </button>
+        <div className="admin-sidebar-foot">
+          <div className="admin-sidebar-email">{email}</div>
+          <button type="button" className="admin-logout" onClick={logout}>
+            Log out
+          </button>
+        </div>
       </aside>
       <main className="admin-main">
-        <Outlet />
+        <div className="admin-main-inner">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
@@ -124,6 +138,10 @@ export default function AdminApp() {
             <Route path="packages" element={<PackagesPage />} />
             <Route path="packages/new" element={<PackageFormPage />} />
             <Route path="packages/:id" element={<PackageFormPage />} />
+            <Route path="deals" element={<DealsPage />} />
+            <Route path="deals/new" element={<DealFormPage />} />
+            <Route path="deals/:id" element={<DealFormPage />} />
+            <Route path="cities" element={<CitiesPage />} />
             <Route path="reviews" element={<ReviewsPage />} />
             <Route path="content" element={<ContentPage />} />
             <Route path="settings" element={<SettingsPage />} />

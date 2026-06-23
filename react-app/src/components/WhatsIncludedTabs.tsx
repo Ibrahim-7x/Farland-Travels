@@ -370,8 +370,30 @@ function buildTabs(dest: Destination, pkgIdx: number): Tab[] {
       ];
     }
 
-    default:
-      return [];
+    default: {
+      // Admin-created deals (any slug not hard-coded above): build a single
+      // "What's included" tab generically from the deal's components so the
+      // section is never empty.
+      const components = dest.components ?? [];
+      if (components.length === 0) return [];
+      return [
+        {
+          id: "included",
+          label: "What's included",
+          flag: "✓",
+          sections: [
+            {
+              icon: "🧳",
+              title: "Package components",
+              items: components.map((c) => ({
+                label: c.label,
+                primary: c.details,
+              })),
+            },
+          ],
+        },
+      ];
+    }
   }
 }
 

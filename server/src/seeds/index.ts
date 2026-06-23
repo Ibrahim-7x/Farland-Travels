@@ -3,6 +3,7 @@ import type { RowDataPacket } from "mysql2/promise";
 import { pool } from "../db/pool";
 import { env } from "../config/env";
 import { UMRAH_CITIES, type UmrahPackage } from "./umrah-data";
+import { DESTINATIONS_SEED } from "./destinations-data";
 
 /** url-safe slug, capped at the column width (100). */
 function slugify(input: string): string {
@@ -41,28 +42,56 @@ async function seedAdmin(): Promise<void> {
   console.log(`[seed] created admin user ${env.ADMIN_EMAIL}.`);
 }
 
-async function seedUmrahPackages(): Promise<void> {
+async function seedCities(): Promise<void> {
   const [countRows] = await pool.query<RowDataPacket[]>(
-    "SELECT COUNT(*) AS n FROM umrah_packages",
+    "SELECT COUNT(*) AS n FROM cities",
   );
   if (Number(countRows[0]?.n ?? 0) > 0) {
-    console.log("[seed] umrah_packages already populated — skip.");
+    console.log("[seed] cities already populated — skip.");
     return;
   }
+  let sortOrder = 0;
+  let inserted = 0;
+  for (const city of UMRAH_CITIES) {
+    const id = slugify(city.city).slice(0, 50);
+    // INSERT IGNORE guards against two seed cities slugging to the same id.
+    const [result] = await pool.query(
+      "INSERT IGNORE INTO cities (id, name, sort_order) VALUES (?, ?, ?)",
+      [id, city.city, sortOrder],
+    );
+    if ((result as { affectedRows?: number }).affectedRows) {
+      sortOrder += 1;
+      inserted += 1;
+    }
+  }
+  console.log(`[seed] inserted ${inserted} cit(y/ies).`);
+}
 
-  const usedSlugs = new Set<string>();
+async function seedUmrahPackages(): Promise<void> {
+  // Additive seed: insert any package whose id isn't in the table yet, and
+  // leave existing rows (including admin edits) untouched. This lets new
+  // sample data land on an already-seeded database via `npm run seed`.
+  const [existingRows] = await pool.query<RowDataPacket[]>(
+    "SELECT id, slug FROM umrah_packages",
+  );
+  const existingIds = new Set(existingRows.map((r) => r.id as string));
+  const usedSlugs = new Set(existingRows.map((r) => r.slug as string));
   let inserted = 0;
 
   for (const city of UMRAH_CITIES) {
     let sortOrder = 0;
     for (const pkg of city.packages) {
+      if (existingIds.has(pkg.id)) {
+        sortOrder += 1;
+        continue;
+      }
       let slug = slugify(`${city.city} ${pkg.name ?? pkg.id}`);
       if (!slug || usedSlugs.has(slug)) slug = slugify(`${city.city} ${pkg.id}`);
       while (usedSlugs.has(slug)) slug = `${slug}-x`;
       usedSlugs.add(slug);
 
       await pool.query(
-        `INSERT INTO umrah_packages (
+        `INSERT IGNORE INTO umrah_packages (
            id, slug, city, stars, nights, room_type, month,
            makkah_hotel, makkah_nights, makkah_rating, makkah_distance,
            madinah_hotel, madinah_nights, madinah_rating, madinah_distance,
@@ -105,6 +134,64 @@ async function seedUmrahPackages(): Promise<void> {
     }
   }
   console.log(`[seed] inserted ${inserted} umrah package(s).`);
+}
+
+async function seedDestinations(): Promise<void> {
+  // Additive: insert any deal whose id isn't already present, leaving existing
+  // rows (including admin edits) untouched — mirrors seedUmrahPackages.
+  const [existingRows] = await pool.query<RowDataPacket[]>(
+    "SELECT id, slug FROM destinations",
+  );
+  const existingIds = new Set(existingRows.map((r) => r.id as string));
+  const usedSlugs = new Set(existingRows.map((r) => r.slug as string));
+  let sortOrder = existingRows.length;
+  let inserted = 0;
+
+  for (const d of DESTINATIONS_SEED) {
+    if (existingIds.has(d.id)) continue;
+    let slug = d.slug || slugify(d.name);
+    while (usedSlugs.has(slug)) slug = `${slug}-x`;
+    usedSlugs.add(slug);
+
+    await pool.query(
+      `INSERT IGNORE INTO destinations (
+         id, slug, name, subtitle, region, region_label, image, hero_image,
+         description, tagline, from_price, badge, rating, rating_text,
+         tags, styles, meta_items, highlights, components, pricing, packages,
+         packages_note, transfers_included, is_published, sort_order
+       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [
+        d.id,
+        slug,
+        d.name,
+        d.subtitle,
+        d.region,
+        d.regionLabel,
+        d.image,
+        d.heroImage,
+        d.description,
+        d.tagline,
+        d.fromPrice,
+        d.badge ?? null,
+        d.rating,
+        d.ratingText,
+        j(d.tags),
+        j(d.styles),
+        j(d.metaItems),
+        j(d.highlights),
+        j(d.components),
+        j(d.pricing),
+        j(d.packages),
+        d.packagesNote ?? null,
+        d.transfersIncluded,
+        1, // is_published
+        sortOrder,
+      ] satisfies unknown[],
+    );
+    sortOrder += 1;
+    inserted += 1;
+  }
+  console.log(`[seed] inserted ${inserted} destination(s).`);
 }
 
 async function seedReviews(): Promise<void> {
@@ -219,7 +306,9 @@ async function seedContent(): Promise<void> {
 /** Runs every seed in dependency order. Each step is individually idempotent. */
 export async function seedAll(): Promise<void> {
   await seedAdmin();
+  await seedCities();
   await seedUmrahPackages();
+  await seedDestinations();
   await seedReviews();
   await seedSettings();
   await seedContent();

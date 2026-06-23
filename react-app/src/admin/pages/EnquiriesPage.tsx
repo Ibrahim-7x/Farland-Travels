@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet } from "../api";
+import {
+  STATUS_LABELS,
+  TYPE_LABELS,
+  formatDateTime,
+  formatRelative,
+  statusClass,
+  typeClass,
+} from "../format";
 
 type Enquiry = {
   id: number;
   type: string;
   name: string;
   email: string;
+  phone: string | null;
   status: string;
   sourcePage: string | null;
   createdAt: string;
@@ -51,6 +60,8 @@ export function EnquiriesPage() {
   }, [status, type, page]);
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
+  const rangeStart = data && data.total > 0 ? (page - 1) * PAGE_SIZE + 1 : 0;
+  const rangeEnd = data ? Math.min(page * PAGE_SIZE, data.total) : 0;
 
   return (
     <>
@@ -68,7 +79,7 @@ export function EnquiriesPage() {
               setStatus(e.target.value);
             }}
           >
-            <option value="">All</option>
+            <option value="">All statuses</option>
             <option value="new">New</option>
             <option value="contacted">Contacted</option>
             <option value="closed">Closed</option>
@@ -84,12 +95,32 @@ export function EnquiriesPage() {
               setType(e.target.value);
             }}
           >
-            <option value="">All</option>
+            <option value="">All types</option>
             <option value="holiday">Holiday</option>
             <option value="umrah">Umrah</option>
             <option value="quote">Quote</option>
           </select>
         </label>
+        {(status || type) && (
+          <button
+            type="button"
+            className="admin-btn admin-btn-ghost admin-btn-sm"
+            onClick={() => {
+              setStatus("");
+              setType("");
+              setPage(1);
+            }}
+          >
+            Clear filters
+          </button>
+        )}
+        {data && (
+          <span className="admin-muted" style={{ marginLeft: "auto" }}>
+            {data.total === 0
+              ? "No results"
+              : `Showing ${rangeStart}–${rangeEnd} of ${data.total}`}
+          </span>
+        )}
       </div>
 
       <div className="admin-card">
@@ -98,32 +129,68 @@ export function EnquiriesPage() {
         ) : !data || data.items.length === 0 ? (
           <p className="admin-muted">No enquiries found.</p>
         ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((e) => (
-                <tr
-                  key={e.id}
-                  className="admin-row-click"
-                  onClick={() => navigate(`/admin/enquiries/${e.id}`)}
-                >
-                  <td>{e.createdAt}</td>
-                  <td>{e.name}</td>
-                  <td>{e.type}</td>
-                  <td>{e.status}</td>
-                  <td>{e.sourcePage ?? "—"}</td>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Received</th>
+                  <th>Name</th>
+                  <th>Contact</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Source</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.items.map((e) => (
+                  <tr
+                    key={e.id}
+                    className="admin-row-click"
+                    onClick={() => navigate(`/admin/enquiries/${e.id}`)}
+                  >
+                    <td>
+                      <div>{formatDateTime(e.createdAt)}</div>
+                      <div className="admin-muted" style={{ fontSize: 12 }}>
+                        {formatRelative(e.createdAt)}
+                      </div>
+                    </td>
+                    <td>
+                      <strong style={{ color: "var(--navy)" }}>{e.name}</strong>
+                      {e.status === "new" && (
+                        <span className="admin-dot" title="Unread" />
+                      )}
+                    </td>
+                    <td>
+                      <div>
+                        <a
+                          href={`mailto:${e.email}`}
+                          onClick={(ev) => ev.stopPropagation()}
+                        >
+                          {e.email}
+                        </a>
+                      </div>
+                      {e.phone && (
+                        <div className="admin-muted" style={{ fontSize: 12 }}>
+                          {e.phone}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <span className={typeClass(e.type)}>
+                        {TYPE_LABELS[e.type] ?? e.type}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={statusClass(e.status)}>
+                        {STATUS_LABELS[e.status] ?? e.status}
+                      </span>
+                    </td>
+                    <td className="admin-muted">{e.sourcePage ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

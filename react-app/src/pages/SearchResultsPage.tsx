@@ -1,10 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import {
-  DESTINATIONS,
-  getDestination,
-  getPriceForMonth,
-} from "../data/destinations";
+import { getDestination, getPriceForMonth } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
 import { SearchBar } from "../components/SearchBar";
 import { WhatsIncludedTabs } from "../components/WhatsIncludedTabs";
 import "./SearchResultsPage.css";
@@ -54,7 +51,8 @@ export function SearchResultsPage() {
     ? Math.min(10, Math.max(1, Math.floor(personsParam)))
     : 2;
 
-  const destination = getDestination(destinationSlug);
+  const { destinations, loading } = useDestinations();
+  const destination = getDestination(destinations, destinationSlug);
   const monthFull = MONTH_FROM_CODE[monthCode] || "";
 
   const isMakkah = destination?.slug === "makkah-madinah";
@@ -75,6 +73,10 @@ export function SearchResultsPage() {
     return getPriceForMonth(destination, monthFull);
   }, [destination, monthFull]);
 
+  if (loading) {
+    return <div className="sr-notfound"><p>Loading…</p></div>;
+  }
+
   if (!destination) {
     return (
       <div className="sr-notfound">
@@ -90,7 +92,7 @@ export function SearchResultsPage() {
     );
   }
 
-  const related = DESTINATIONS.filter((d) => d.slug !== destination.slug).slice(
+  const related = destinations.filter((d) => d.slug !== destination.slug).slice(
     0,
     3
   );

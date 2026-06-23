@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiGet, apiPost, apiPut } from "../api";
+import { PackageInlineEditor } from "../components/PackageInlineEditor";
 
-const INCLUSIONS = ["visa", "flights", "transfers", "breakfast", "ziyarah", "guide"];
-const TIERS = ["Economy", "Premium", "VIP"];
-const BADGES = ["Best Seller", "Limited Seats", "Early Bird"];
+const BADGES = ["", "Best Seller", "Limited Seats", "Early Bird"];
 
 type RoomRate = { room: string; priceDisplay: string };
 
-type Draft = {
+export type Draft = {
   city: string;
   stars: string;
   nights: string;
@@ -26,7 +25,7 @@ type Draft = {
   priceDisplay: string;
   name: string;
   tier: string;
-  departureDates: string;
+  departureDates: string[];
   roomRates: RoomRate[];
   flightAirline: string;
   flightRouting: string;
@@ -54,7 +53,7 @@ const BLANK: Draft = {
   priceDisplay: "",
   name: "",
   tier: "",
-  departureDates: "",
+  departureDates: [],
   roomRates: [],
   flightAirline: "",
   flightRouting: "",
@@ -110,7 +109,7 @@ function fromApi(p: ApiPkg): Draft {
     priceDisplay: p.priceDisplay ?? "",
     name: p.name ?? "",
     tier: p.tier ?? "",
-    departureDates: (p.departureDates ?? []).join("\n"),
+    departureDates: p.departureDates ?? [],
     roomRates: (p.roomRates ?? []).map((r) => ({
       room: r.room,
       priceDisplay: r.priceDisplay,
@@ -143,10 +142,7 @@ function toBody(d: Draft): Record<string, unknown> {
     priceDisplay: d.priceDisplay.trim() || null,
     name: d.name.trim() || null,
     tier: d.tier || null,
-    departureDates: d.departureDates
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean),
+    departureDates: d.departureDates.map((s) => s.trim()).filter(Boolean),
     roomRates: d.roomRates.filter((r) => r.room.trim() && r.priceDisplay.trim()),
     flight:
       d.flightAirline.trim() && d.flightRouting.trim()
@@ -179,28 +175,13 @@ export function PackageFormPage() {
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
-  const updateRate = (i: number, field: keyof RoomRate, value: string) =>
-    setDraft((d) => {
-      const roomRates = d.roomRates.map((r, idx) =>
-        idx === i ? { ...r, [field]: value } : r,
-      );
-      return { ...d, roomRates };
-    });
-  const addRate = () =>
-    setDraft((d) => ({ ...d, roomRates: [...d.roomRates, { room: "", priceDisplay: "" }] }));
-  const removeRate = (i: number) =>
-    setDraft((d) => ({ ...d, roomRates: d.roomRates.filter((_, idx) => idx !== i) }));
-
-  const toggleInclusion = (key: string, on: boolean) =>
-    setDraft((d) => ({
-      ...d,
-      inclusions: on
-        ? [...d.inclusions, key]
-        : d.inclusions.filter((k) => k !== key),
-    }));
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
+    if (!draft.city.trim()) return setErr("Add a departure city before saving.");
+    if (!draft.stars.trim()) return setErr("Add a star rating before saving.");
+    if (!draft.nights.trim()) return setErr("Add the nights before saving.");
+    if (!draft.roomType.trim()) return setErr("Add a room type before saving.");
+    if (draft.price === "" || Number.isNaN(Number(draft.price)))
+      return setErr("Add a numeric price (used for sorting) in the settings panel.");
     setBusy(true);
     setErr("");
     try {
@@ -219,189 +200,82 @@ export function PackageFormPage() {
 
   return (
     <>
-      <h1 className="admin-h1">{isEdit ? "Edit package" : "New package"}</h1>
-      <p className="admin-sub">All AUD prices. Leave optional fields blank to hide them on the card.</p>
-
-      <form className="admin-card" onSubmit={submit}>
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>City *</span>
-            <input className="admin-input" value={draft.city} onChange={(e) => set("city", e.target.value)} required placeholder="Perth" />
-          </label>
-          <label className="admin-field">
-            <span>Display name</span>
-            <input className="admin-input" value={draft.name} onChange={(e) => set("name", e.target.value)} placeholder="10-Night Signature Umrah" />
-          </label>
-        </div>
-
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Stars *</span>
-            <input className="admin-input" value={draft.stars} onChange={(e) => set("stars", e.target.value)} required placeholder="5 Star" />
-          </label>
-          <label className="admin-field">
-            <span>Nights *</span>
-            <input className="admin-input" value={draft.nights} onChange={(e) => set("nights", e.target.value)} required placeholder="10 nights" />
-          </label>
-        </div>
-
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Room type *</span>
-            <input className="admin-input" value={draft.roomType} onChange={(e) => set("roomType", e.target.value)} required placeholder="Quad" />
-          </label>
-          <label className="admin-field">
-            <span>Month</span>
-            <input className="admin-input" value={draft.month} onChange={(e) => set("month", e.target.value)} placeholder="September" />
-          </label>
-        </div>
-
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Tier</span>
-            <select className="admin-select" value={draft.tier} onChange={(e) => set("tier", e.target.value)}>
-              <option value="">— None —</option>
-              {TIERS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </label>
-          <label className="admin-field">
-            <span>Badge</span>
-            <select className="admin-select" value={draft.badge} onChange={(e) => set("badge", e.target.value)}>
-              <option value="">— None —</option>
-              {BADGES.map((b) => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Price (number) *</span>
-            <input className="admin-input" type="number" step="0.01" value={draft.price} onChange={(e) => set("price", e.target.value)} required placeholder="1675" />
-          </label>
-          <label className="admin-field">
-            <span>Price display</span>
-            <input className="admin-input" value={draft.priceDisplay} onChange={(e) => set("priceDisplay", e.target.value)} placeholder="A$1,675" />
-          </label>
-        </div>
-
-        <h3 style={{ color: "var(--navy)" }}>Makkah hotel</h3>
-        <label className="admin-field">
-          <span>Hotel name</span>
-          <input className="admin-input" value={draft.makkahHotel} onChange={(e) => set("makkahHotel", e.target.value)} />
+      <div className="iedeal-bar">
+        <button
+          type="button"
+          className="admin-btn admin-btn-ghost admin-btn-sm"
+          onClick={() => navigate("/admin/packages")}
+        >
+          ← Cancel
+        </button>
+        <span className="iedeal-bar-title">
+          {isEdit ? "Editing" : "New package"}
+          {draft.name ? `: ${draft.name}` : draft.city ? `: ${draft.city}` : ""}
+        </span>
+        <label className="iedeal-pub">
+          <input
+            type="checkbox"
+            checked={draft.isPublished}
+            onChange={(e) => set("isPublished", e.target.checked)}
+          />
+          Published
         </label>
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Nights</span>
-            <input className="admin-input" value={draft.makkahNights} onChange={(e) => set("makkahNights", e.target.value)} placeholder="6 nights" />
-          </label>
-          <label className="admin-field">
-            <span>Rating (0–5)</span>
-            <input className="admin-input" type="number" step="0.1" min="0" max="5" value={draft.makkahRating} onChange={(e) => set("makkahRating", e.target.value)} />
-          </label>
-        </div>
-        <label className="admin-field">
-          <span>Distance</span>
-          <input className="admin-input" value={draft.makkahDistance} onChange={(e) => set("makkahDistance", e.target.value)} placeholder="≈300 m from the Haram" />
-        </label>
+        <button className="admin-btn" type="button" onClick={submit} disabled={busy}>
+          {busy ? "Saving…" : isEdit ? "Save changes" : "Create package"}
+        </button>
+      </div>
 
-        <h3 style={{ color: "var(--navy)" }}>Madinah hotel</h3>
-        <label className="admin-field">
-          <span>Hotel name</span>
-          <input className="admin-input" value={draft.madinahHotel} onChange={(e) => set("madinahHotel", e.target.value)} />
-        </label>
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Nights</span>
-            <input className="admin-input" value={draft.madinahNights} onChange={(e) => set("madinahNights", e.target.value)} placeholder="4 nights" />
-          </label>
-          <label className="admin-field">
-            <span>Rating (0–5)</span>
-            <input className="admin-input" type="number" step="0.1" min="0" max="5" value={draft.madinahRating} onChange={(e) => set("madinahRating", e.target.value)} />
-          </label>
-        </div>
-        <label className="admin-field">
-          <span>Distance</span>
-          <input className="admin-input" value={draft.madinahDistance} onChange={(e) => set("madinahDistance", e.target.value)} placeholder="≈250 m from Masjid an-Nabawi" />
-        </label>
+      {err && <div className="admin-error" style={{ marginBottom: 14 }}>{err}</div>}
 
-        <h3 style={{ color: "var(--navy)" }}>Flight</h3>
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Airline</span>
-            <input className="admin-input" value={draft.flightAirline} onChange={(e) => set("flightAirline", e.target.value)} placeholder="Qatar Airways" />
-          </label>
-          <label className="admin-field">
-            <span>Routing</span>
-            <input className="admin-input" value={draft.flightRouting} onChange={(e) => set("flightRouting", e.target.value)} placeholder="1 stop via Doha" />
-          </label>
-        </div>
+      <p className="admin-sub" style={{ marginBottom: 16 }}>
+        This is the package as it appears on the Umrah page — hover any line to
+        edit it. The numeric price and a few flags are in the panel below.
+      </p>
 
-        <label className="admin-field">
-          <span>Departure dates (one per line)</span>
-          <textarea className="admin-textarea" value={draft.departureDates} onChange={(e) => set("departureDates", e.target.value)} placeholder={"4 Sep 2026\n18 Sep 2026"} />
-        </label>
+      <PackageInlineEditor draft={draft} set={set} />
 
-        <div className="admin-field">
-          <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--navy)", marginBottom: 6 }}>
-            Room rates
-          </span>
-          {draft.roomRates.map((r, i) => (
-            <div className="admin-row" key={i} style={{ marginBottom: 8 }}>
-              <input className="admin-input" placeholder="Room (e.g. Quad)" value={r.room} onChange={(e) => updateRate(i, "room", e.target.value)} />
-              <div style={{ display: "flex", gap: 8 }}>
-                <input className="admin-input" placeholder="A$1,675" value={r.priceDisplay} onChange={(e) => updateRate(i, "priceDisplay", e.target.value)} />
-                <button type="button" className="admin-btn admin-btn-ghost admin-btn-sm" onClick={() => removeRate(i)}>✕</button>
-              </div>
-            </div>
-          ))}
-          <button type="button" className="admin-btn admin-btn-ghost admin-btn-sm" onClick={addRate}>+ Add room rate</button>
-        </div>
-
-        <div className="admin-field">
-          <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--navy)", marginBottom: 6 }}>
-            Inclusions
-          </span>
+      <details className="iedeal-settings" open={!isEdit}>
+        <summary>⚙ Price &amp; listing settings</summary>
+        <div className="iedeal-settings-body">
+          <div className="admin-row">
+            <label className="admin-field">
+              <span>Price — numeric, AUD (used for sorting / "from" price) *</span>
+              <input
+                className="admin-input"
+                type="number"
+                step="0.01"
+                value={draft.price}
+                onChange={(e) => set("price", e.target.value)}
+                placeholder="1675"
+              />
+            </label>
+            <label className="admin-field">
+              <span>Badge (ribbon on cards)</span>
+              <select
+                className="admin-select"
+                value={draft.badge}
+                onChange={(e) => set("badge", e.target.value)}
+              >
+                {BADGES.map((b) => (
+                  <option key={b || "none"} value={b}>
+                    {b || "— None —"}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="admin-actions">
-            {INCLUSIONS.map((key) => (
-              <label key={key} style={{ textTransform: "capitalize" }}>
-                <input
-                  type="checkbox"
-                  checked={draft.inclusions.includes(key)}
-                  onChange={(e) => toggleInclusion(key, e.target.checked)}
-                />{" "}
-                {key}
-              </label>
-            ))}
+            <label>
+              <input
+                type="checkbox"
+                checked={draft.mostPopular}
+                onChange={(e) => set("mostPopular", e.target.checked)}
+              />{" "}
+              Most popular (highlighted card — one per city)
+            </label>
           </div>
         </div>
-
-        <div className="admin-actions" style={{ marginBottom: 12 }}>
-          <label>
-            <input type="checkbox" checked={draft.mostPopular} onChange={(e) => set("mostPopular", e.target.checked)} />{" "}
-            Most popular (highlighted card)
-          </label>
-          {!isEdit && (
-            <label>
-              <input type="checkbox" checked={draft.isPublished} onChange={(e) => set("isPublished", e.target.checked)} />{" "}
-              Publish immediately
-            </label>
-          )}
-        </div>
-
-        {err && <div className="admin-error">{err}</div>}
-        <div className="admin-actions">
-          <button className="admin-btn" type="submit" disabled={busy}>
-            {busy ? "Saving…" : isEdit ? "Save changes" : "Create package"}
-          </button>
-          <button type="button" className="admin-btn admin-btn-ghost" onClick={() => navigate("/admin/packages")}>
-            Cancel
-          </button>
-        </div>
-      </form>
+      </details>
     </>
   );
 }

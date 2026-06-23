@@ -7,6 +7,7 @@ const PLACEHOLDER_PHONE = "+61 0 0000 0000";
 export function DashboardPage() {
   const [newEnquiries, setNewEnquiries] = useState<number | null>(null);
   const [publishedPackages, setPublishedPackages] = useState<number | null>(null);
+  const [publishedDeals, setPublishedDeals] = useState<number | null>(null);
   const [publishedReviews, setPublishedReviews] = useState<number | null>(null);
   const [placeholderWarning, setPlaceholderWarning] = useState(false);
 
@@ -16,6 +17,9 @@ export function DashboardPage() {
       .catch(() => {});
     apiGet<{ isPublished: boolean }[]>("/admin/umrah-packages")
       .then((d) => setPublishedPackages(d.filter((p) => p.isPublished).length))
+      .catch(() => {});
+    apiGet<{ isPublished: boolean }[]>("/admin/destinations")
+      .then((d) => setPublishedDeals(d.filter((p) => p.isPublished).length))
       .catch(() => {});
     apiGet<{ isPublished: boolean }[]>("/admin/reviews")
       .then((d) => setPublishedReviews(d.filter((r) => r.isPublished).length))
@@ -58,6 +62,10 @@ export function DashboardPage() {
           <span>Published packages</span>
         </div>
         <div className="admin-stat">
+          <strong>{show(publishedDeals)}</strong>
+          <span>Published deals</span>
+        </div>
+        <div className="admin-stat">
           <strong>{show(publishedReviews)}</strong>
           <span>Published reviews</span>
         </div>
@@ -67,6 +75,7 @@ export function DashboardPage() {
         <div className="admin-actions">
           <Link className="admin-btn" to="/admin/enquiries">View enquiries</Link>
           <Link className="admin-btn admin-btn-ghost" to="/admin/packages">Manage packages</Link>
+          <Link className="admin-btn admin-btn-ghost" to="/admin/deals">Manage deals</Link>
           <Link className="admin-btn admin-btn-ghost" to="/admin/reviews">Manage reviews</Link>
           <Link className="admin-btn admin-btn-ghost" to="/admin/content">Edit content</Link>
         </div>

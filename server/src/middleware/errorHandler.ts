@@ -34,6 +34,17 @@ export function errorHandler(
     return;
   }
 
+  // multer upload errors (e.g. file too large) → 400 with a readable message.
+  if ((err as { name?: string })?.name === "MulterError") {
+    const code = (err as { code?: string }).code;
+    const message =
+      code === "LIMIT_FILE_SIZE"
+        ? "Image is too large (max 8 MB)"
+        : `Upload error: ${(err as Error).message}`;
+    res.status(400).json({ error: message });
+    return;
+  }
+
   // Unexpected errors: log server-side, never leak details to clients.
   console.error("Unhandled error:", err);
   res.status(500).json({

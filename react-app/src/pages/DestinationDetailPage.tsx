@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { DESTINATIONS, getDestination } from "../data/destinations";
+import { getDestination } from "../data/destinations";
+import { useDestinations } from "../contexts/destinationsContext";
 import { WhatsIncludedTabs } from "../components/WhatsIncludedTabs";
 import "./DestinationDetailPage.css";
 
 export function DestinationDetailPage() {
   const { slug } = useParams();
-  const destination = getDestination(slug);
+  const { destinations, loading } = useDestinations();
+  const destination = getDestination(destinations, slug);
   const [stickyVisible, setStickyVisible] = useState(false);
 
   // Enquiry form state.
@@ -40,6 +42,10 @@ export function DestinationDetailPage() {
     );
   }, [destination]);
 
+  if (loading) {
+    return <div className="dd-notfound"><p>Loading…</p></div>;
+  }
+
   if (!destination) {
     return (
       <div className="dd-notfound">
@@ -52,7 +58,7 @@ export function DestinationDetailPage() {
     );
   }
 
-  const related = DESTINATIONS.filter((d) => d.slug !== destination.slug).slice(0, 3);
+  const related = destinations.filter((d) => d.slug !== destination.slug).slice(0, 3);
 
   const submitEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
