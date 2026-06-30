@@ -433,7 +433,7 @@ export function UmrahPage() {
   // Fetch published packages once on mount.
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/umrah-packages")
+    fetch("/api/umrah-packages", { cache: "no-store" })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<ApiPackage[]>;
@@ -454,7 +454,7 @@ export function UmrahPage() {
   // Fetch the admin-managed city list for the dropdown (best-effort).
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/cities")
+    fetch("/api/cities", { cache: "no-store" })
       .then((res) => (res.ok ? (res.json() as Promise<City[]>) : []))
       .then((data) => {
         if (!cancelled) setCities(data);

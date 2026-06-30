@@ -49,6 +49,20 @@ export function createApp(): Express {
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
 
+  // Dynamic API data must never be cached by the browser/proxy — otherwise an
+  // admin edit won't show on the public site until the cache expires (this is
+  // the "changes don't reflect even after a refresh" bug). Applied to the JSON
+  // data routes below; the long-cached uploaded media (mounted before this)
+  // is deliberately left untouched.
+  const noStore = (
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    res.set("Cache-Control", "no-store");
+    next();
+  };
+
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true });
   });
@@ -67,26 +81,26 @@ export function createApp(): Express {
   );
 
   // ── Public API ──
-  app.use("/api/umrah-packages", umrahPublicRouter);
-  app.use("/api/destinations", destinationsPublicRouter);
-  app.use("/api/cities", citiesPublicRouter);
-  app.use("/api/reviews", reviewsPublicRouter);
-  app.use("/api/content", contentPublicRouter);
-  app.use("/api/settings", settingsPublicRouter);
-  app.use("/api/enquiries", enquiriesPublicRouter);
+  app.use("/api/umrah-packages", noStore, umrahPublicRouter);
+  app.use("/api/destinations", noStore, destinationsPublicRouter);
+  app.use("/api/cities", noStore, citiesPublicRouter);
+  app.use("/api/reviews", noStore, reviewsPublicRouter);
+  app.use("/api/content", noStore, contentPublicRouter);
+  app.use("/api/settings", noStore, settingsPublicRouter);
+  app.use("/api/enquiries", noStore, enquiriesPublicRouter);
 
   // ── Auth ──
   app.use("/api/auth", authRouter);
 
   // ── Admin API (JWT-guarded) ──
-  app.use("/api/admin/umrah-packages", verifyJWT, packagesAdminRouter);
-  app.use("/api/admin/destinations", verifyJWT, destinationsAdminRouter);
-  app.use("/api/admin/uploads", verifyJWT, uploadsAdminRouter);
-  app.use("/api/admin/cities", verifyJWT, citiesAdminRouter);
-  app.use("/api/admin/reviews", verifyJWT, reviewsAdminRouter);
-  app.use("/api/admin/enquiries", verifyJWT, enquiriesAdminRouter);
-  app.use("/api/admin/content", verifyJWT, contentAdminRouter);
-  app.use("/api/admin/settings", verifyJWT, settingsAdminRouter);
+  app.use("/api/admin/umrah-packages", noStore, verifyJWT, packagesAdminRouter);
+  app.use("/api/admin/destinations", noStore, verifyJWT, destinationsAdminRouter);
+  app.use("/api/admin/uploads", noStore, verifyJWT, uploadsAdminRouter);
+  app.use("/api/admin/cities", noStore, verifyJWT, citiesAdminRouter);
+  app.use("/api/admin/reviews", noStore, verifyJWT, reviewsAdminRouter);
+  app.use("/api/admin/enquiries", noStore, verifyJWT, enquiriesAdminRouter);
+  app.use("/api/admin/content", noStore, verifyJWT, contentAdminRouter);
+  app.use("/api/admin/settings", noStore, verifyJWT, settingsAdminRouter);
 
   // Unmatched API routes → JSON 404; everything → error handler.
   app.use("/api", notFound);

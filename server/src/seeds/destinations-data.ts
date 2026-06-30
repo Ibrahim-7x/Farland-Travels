@@ -3,6 +3,16 @@
 // whose id isn't already in the `destinations` table and leaves existing
 // rows (including admin edits) untouched.
 
+type WitImage = { src: string; alt: string };
+type WitItem = { label?: string; primary?: string; pills?: string[] };
+type WitSection = {
+  icon: string;
+  title: string;
+  items: WitItem[];
+  images?: WitImage[];
+};
+type WitTab = { id: string; label: string; flag: string; sections: WitSection[] };
+
 export type DestinationSeed = {
   id: string;
   slug: string;
@@ -23,6 +33,7 @@ export type DestinationSeed = {
   metaItems: { strong: string; rest: string }[];
   highlights?: { icon: string; title: string; text: string }[];
   components?: { label: string; details: string }[];
+  whatsIncluded?: WitTab[];
   pricing?: { month: string; amount: string; currency: string; display: string }[];
   packages?: unknown[];
   packagesNote?: string;
@@ -109,6 +120,102 @@ export const DESTINATIONS_SEED: DestinationSeed[] = [
         details: "All ground transfers included",
       },
     ],
+    whatsIncluded: [
+      {
+        id: "sg",
+        label: "Singapore",
+        flag: "🇸🇬",
+        sections: [
+          {
+            icon: "✈️",
+            title: "Flights",
+            items: [
+              {
+                label: "To Singapore",
+                pills: ["Economy Class", "1 Piece Luggage", "From Perth"],
+              },
+              {
+                label: "Internal (SIN)",
+                pills: ["Economy Class", "20kg PP", "From SIN"],
+              },
+            ],
+          },
+          {
+            icon: "🏨",
+            title: "Hotel",
+            items: [
+              {
+                primary: "Furama Riverfront",
+                pills: ["Superior Room", "Room Only", "04 Nights"],
+              },
+            ],
+            images: [
+              { src: "/singapour-bali/singapore-bali-lobby.webp", alt: "Hotel lobby" },
+              { src: "/singapour-bali/singapore-bali-hotel.webp", alt: "Hotel exterior" },
+              { src: "/singapour-bali/singapore-bali-bed-1.webp", alt: "Superior Room" },
+              { src: "/singapour-bali/singapore-bali-bed-2.webp", alt: "Superior Room — twin layout" },
+            ],
+          },
+          {
+            icon: "🎯",
+            title: "Excursions",
+            items: [
+              {
+                pills: ["Marina Bay", "Deck Tickets", "Sands SkyPark", "Gardens by the Bay"],
+              },
+            ],
+            images: [
+              { src: "/singapour-bali/singapore-bali-exc.webp", alt: "Excursion" },
+              { src: "/singapour-bali/singapore-bali-exc-2.webp", alt: "Excursion" },
+              { src: "/singapour-bali/singapore-bali-exc-3.webp", alt: "Excursion" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "bali",
+        label: "Bali",
+        flag: "🇮🇩",
+        sections: [
+          {
+            icon: "🏨",
+            title: "Hotel — Seminyak",
+            items: [
+              {
+                primary: "FuramaXclusive Ocean Beach",
+                pills: ["Studio Room", "Breakfast", "07 Nights"],
+              },
+            ],
+            images: [
+              { src: "/singapour-bali/bali-hotel.webp", alt: "Hotel exterior" },
+              { src: "/singapour-bali/bali-deck.webp", alt: "Pool deck" },
+              { src: "/singapour-bali/bali-room-studio.webp", alt: "Studio Room" },
+              { src: "/singapour-bali/bali-studio-2.webp", alt: "Studio Room — alternate view" },
+            ],
+          },
+          {
+            icon: "🎯",
+            title: "Excursions",
+            items: [
+              { primary: "Snorkelling to the Blue Lagoon — Full Day Tour" },
+              {
+                primary: "Ubud Highlights Private Tour",
+                pills: ["Private guide + transfers included"],
+              },
+            ],
+            images: [
+              { src: "/singapour-bali/bali-exc.webp", alt: "Excursion" },
+              { src: "/singapour-bali/bali-exc-2.webp", alt: "Excursion" },
+            ],
+          },
+          {
+            icon: "🚌",
+            title: "Transfers",
+            items: [{ primary: "All ground transfers included" }],
+          },
+        ],
+      },
+    ],
     pricing: [
       { month: "May", amount: "2,088", currency: "AUD", display: "AUD $2,088" },
       { month: "June", amount: "2,183", currency: "AUD", display: "AUD $2,183" },
@@ -186,6 +293,65 @@ export const DESTINATIONS_SEED: DestinationSeed[] = [
           "Bali & Gili Highlight Private Tour — Standard Room · Daily Meals · 12 Days / 11 Nights",
       },
       { label: "Transfers", details: "Not Included" },
+    ],
+    whatsIncluded: [
+      {
+        id: "dubai",
+        label: "Dubai",
+        flag: "🇦🇪",
+        sections: [
+          {
+            icon: "✈️",
+            title: "Flights",
+            items: [{ pills: ["Economy Class", "1 Piece Luggage", "From Perth"] }],
+          },
+          {
+            icon: "🏨",
+            title: "Hotel",
+            items: [
+              {
+                primary: "Four Points Sheraton Bur Dubai",
+                pills: ["Classic Room", "Breakfast", "03 Nights"],
+              },
+            ],
+            images: [
+              { src: "/dubai-bali/dubai-hotel.webp", alt: "Hotel exterior" },
+              { src: "/dubai-bali/dubai-hotel-2.webp", alt: "Hotel exterior" },
+              { src: "/dubai-bali/dubai-hotel-3.webp", alt: "Hotel interior" },
+              { src: "/dubai-bali/dubai-room.webp", alt: "Classic Room" },
+              { src: "/dubai-bali/dubai-room-2.webp", alt: "Classic Room — alternate view" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "bali",
+        label: "Bali",
+        flag: "🇮🇩",
+        sections: [
+          {
+            icon: "🎯",
+            title: "Tour",
+            items: [
+              {
+                primary: "Bali & Gili Highlight Private Tour",
+                pills: ["Standard Room", "Daily Meals", "12 Days / 11 Nights"],
+              },
+            ],
+            images: [
+              { src: "/dubai-bali/bali-gili-hotel.webp", alt: "Bali & Gili tour hotel" },
+              { src: "/dubai-bali/bali-gili-hotel-2.webp", alt: "Bali & Gili tour hotel" },
+              { src: "/dubai-bali/bali-gili-hotel-3.webp", alt: "Bali & Gili tour hotel" },
+              { src: "/dubai-bali/bali-gili-hotel-4.webp", alt: "Bali & Gili tour hotel" },
+            ],
+          },
+          {
+            icon: "🚌",
+            title: "Transfers",
+            items: [{ primary: "Not Included" }],
+          },
+        ],
+      },
     ],
     pricing: [
       { month: "May", amount: "4,497", currency: "AUD", display: "AUD $4,497" },
@@ -268,6 +434,109 @@ export const DESTINATIONS_SEED: DestinationSeed[] = [
       {
         label: "Transfers",
         details: "All ground return transfers included",
+      },
+    ],
+    whatsIncluded: [
+      {
+        id: "ubud",
+        label: "Ubud",
+        flag: "🛕",
+        sections: [
+          {
+            icon: "✈️",
+            title: "Flights",
+            items: [{ pills: ["Economy Class", "1 Piece Luggage", "From Perth"] }],
+          },
+          {
+            icon: "🏨",
+            title: "Hotel",
+            items: [
+              {
+                primary: "Ashoka Tree Resort",
+                pills: ["Superior Room", "Breakfast", "05 Nights"],
+              },
+            ],
+            images: [
+              { src: "/bali-long/ashoka-tree-resort.webp", alt: "Ashoka Tree Resort" },
+              { src: "/bali-long/ashoka-tree-resort-room.webp", alt: "Ashoka Tree Resort room" },
+              { src: "/bali-long/ashoka-tree-resort-room-2.webp", alt: "Ashoka Tree Resort room - photo 2" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "nusadua",
+        label: "Nusa Dua",
+        flag: "🏖",
+        sections: [
+          {
+            icon: "🏨",
+            title: "Hotel",
+            items: [
+              {
+                primary: "Mercure Bali Nusa Dua",
+                pills: ["Superior Garden View", "Breakfast", "05 Nights"],
+              },
+            ],
+            images: [
+              { src: "/bali-long/bali-nusa-dua.webp", alt: "Mercure Bali Nusa Dua" },
+              { src: "/bali-long/bali-nusa-dua-2.webp", alt: "Mercure Bali Nusa Dua - photo 2" },
+              { src: "/bali-long/bali-nusa-dua-3.webp", alt: "Mercure Bali Nusa Dua - photo 3" },
+              { src: "/bali-long/bali-nusa-dua-4.webp", alt: "Mercure Bali Nusa Dua - photo 4" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "canggu",
+        label: "Canggu",
+        flag: "🏄",
+        sections: [
+          {
+            icon: "🏨",
+            title: "Hotel",
+            items: [
+              {
+                primary: "Hotel Sages",
+                pills: ["Superior Suite", "Breakfast", "03 Nights"],
+              },
+            ],
+            images: [
+              { src: "/bali-long/bali-sages.webp", alt: "Hotel Sages" },
+              { src: "/bali-long/bali-sages-1.webp", alt: "Hotel Sages - photo 2" },
+              { src: "/bali-long/bali-sages-2.webp", alt: "Hotel Sages - photo 3" },
+              { src: "/bali-long/bali-sages-3.webp", alt: "Hotel Sages - photo 4" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "seminyak",
+        label: "Seminyak",
+        flag: "🍹",
+        sections: [
+          {
+            icon: "🏨",
+            title: "Hotel",
+            items: [
+              {
+                primary: "Paragon Hotel Seminyak",
+                pills: ["Deluxe Balcony Room", "Breakfast", "07 Nights"],
+              },
+            ],
+            images: [
+              { src: "/bali-long/bali-seminyak.webp", alt: "Paragon Hotel Seminyak" },
+              { src: "/bali-long/bali-seminyak-1.webp", alt: "Paragon Hotel Seminyak - photo 2" },
+              { src: "/bali-long/bali-seminyak-2.webp", alt: "Paragon Hotel Seminyak - photo 3" },
+              { src: "/bali-long/bali-seminyak-3.webp", alt: "Paragon Hotel Seminyak - photo 4" },
+            ],
+          },
+          {
+            icon: "🚌",
+            title: "Transfers",
+            items: [{ primary: "All ground return transfers included" }],
+          },
+        ],
       },
     ],
     pricing: [

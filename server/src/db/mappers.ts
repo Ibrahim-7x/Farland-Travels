@@ -64,6 +64,15 @@ export function mapDestinationRow(row: RowDataPacket) {
       [],
     components:
       (row.components as { label: string; details: string }[] | null) ?? [],
+    whatsIncluded:
+      (row.whats_included as
+        | {
+            id: string;
+            label: string;
+            flag: string;
+            sections: unknown[];
+          }[]
+        | null) ?? [],
     pricing:
       (row.pricing as
         | { month: string; amount: string; currency: string; display: string }[]

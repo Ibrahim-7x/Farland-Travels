@@ -20,7 +20,7 @@ function parsePrice(s: string): number {
 type SortValue = "popular" | "price-asc" | "price-desc" | "alpha";
 
 export function DealsPage() {
-  const { destinations } = useDestinations();
+  const { destinations, loading, error } = useDestinations();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCat = (searchParams.get("cat") ?? "all").toLowerCase();
 
@@ -217,7 +217,41 @@ export function DealsPage() {
             </div>
           </div>
 
-          {filtered.length === 0 && (
+          {loading && destinations.length === 0 ? (
+            <div className="deals-empty">
+              <div className="deals-empty-icon" aria-hidden="true">
+                ⏳
+              </div>
+              <h2>Loading deals…</h2>
+              <p>Fetching the latest published packages and prices.</p>
+            </div>
+          ) : error && destinations.length === 0 ? (
+            <div className="deals-empty">
+              <div className="deals-empty-icon" aria-hidden="true">
+                ⚠️
+              </div>
+              <h2>We couldn't load the deals</h2>
+              <p>
+                Please check your connection and refresh the page — our
+                specialists are also just a phone call away.
+              </p>
+              <div className="deals-empty-actions">
+                <button
+                  type="button"
+                  className="btn btn-gold"
+                  onClick={() => window.location.reload()}
+                >
+                  Refresh
+                </button>
+                <Link
+                  to="/contact#inquiry-section"
+                  className="btn btn-outline-navy"
+                >
+                  Contact us →
+                </Link>
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="deals-empty">
               <div className="deals-empty-icon" aria-hidden="true">
                 🧭
@@ -240,10 +274,9 @@ export function DealsPage() {
                 </button>
               </div>
             </div>
-          )}
-
-          <div className={`dp-deals-grid ${view === "list" ? "lv" : ""}`}>
-            {filtered.map((d) => {
+          ) : (
+            <div className={`dp-deals-grid ${view === "list" ? "lv" : ""}`}>
+              {filtered.map((d) => {
               const pricing = d.pricing ?? [];
               const packages = d.packages ?? [];
               return (
@@ -370,7 +403,8 @@ export function DealsPage() {
                 </Link>
               );
             })}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 

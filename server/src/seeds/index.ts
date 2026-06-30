@@ -157,9 +157,10 @@ async function seedDestinations(): Promise<void> {
       `INSERT IGNORE INTO destinations (
          id, slug, name, subtitle, region, region_label, image, hero_image,
          description, tagline, from_price, badge, rating, rating_text,
-         tags, styles, meta_items, highlights, components, pricing, packages,
-         packages_note, transfers_included, is_published, sort_order
-       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+         tags, styles, meta_items, highlights, components, whats_included,
+         pricing, packages, packages_note, transfers_included,
+         is_published, sort_order
+       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         d.id,
         slug,
@@ -180,6 +181,7 @@ async function seedDestinations(): Promise<void> {
         j(d.metaItems),
         j(d.highlights),
         j(d.components),
+        j(d.whatsIncluded),
         j(d.pricing),
         j(d.packages),
         d.packagesNote ?? null,
@@ -192,6 +194,26 @@ async function seedDestinations(): Promise<void> {
     inserted += 1;
   }
   console.log(`[seed] inserted ${inserted} destination(s).`);
+}
+
+/**
+ * Backfills the new `whats_included` column on deals that already exist (from
+ * the earlier `components`-only seed) but haven't had it set yet. Only touches
+ * rows where the column IS NULL, so admin edits are never overwritten — it's
+ * safe to re-run. Lets the rich, editable "What's Included" appear on existing
+ * installs without wiping their data.
+ */
+async function seedDestinationWhatsIncluded(): Promise<void> {
+  let updated = 0;
+  for (const d of DESTINATIONS_SEED) {
+    if (!d.whatsIncluded || d.whatsIncluded.length === 0) continue;
+    const [result] = await pool.query(
+      "UPDATE destinations SET whats_included = ? WHERE id = ? AND whats_included IS NULL",
+      [j(d.whatsIncluded), d.id],
+    );
+    if ((result as { affectedRows?: number }).affectedRows) updated += 1;
+  }
+  console.log(`[seed] backfilled what's-included on ${updated} destination(s).`);
 }
 
 async function seedReviews(): Promise<void> {
@@ -309,6 +331,7 @@ export async function seedAll(): Promise<void> {
   await seedCities();
   await seedUmrahPackages();
   await seedDestinations();
+  await seedDestinationWhatsIncluded();
   await seedReviews();
   await seedSettings();
   await seedContent();

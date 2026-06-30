@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import type { WhatsIncludedTab } from "../../data/destinations";
 import { apiGet, apiPost, apiPut } from "../api";
 import { ImageUpload } from "../components/ImageUpload";
 import { DealInlineEditor } from "../components/DealInlineEditor";
@@ -39,6 +40,7 @@ export type Draft = {
   metaItems: MetaItem[];
   highlights: Highlight[];
   components: Component[];
+  whatsIncluded: WhatsIncludedTab[];
   pricing: Pricing[];
   packages: SubPackage[];
   isPublished: boolean;
@@ -65,6 +67,7 @@ const BLANK: Draft = {
   metaItems: [],
   highlights: [],
   components: [],
+  whatsIncluded: [],
   pricing: [],
   packages: [],
   isPublished: false,
@@ -91,6 +94,7 @@ type ApiDeal = {
   metaItems: MetaItem[];
   highlights: Highlight[];
   components: Component[];
+  whatsIncluded?: WhatsIncludedTab[] | null;
   pricing: Pricing[];
   packages: SubPackage[];
   isPublished: boolean;
@@ -118,6 +122,7 @@ function fromApi(d: ApiDeal): Draft {
     metaItems: d.metaItems ?? [],
     highlights: d.highlights ?? [],
     components: d.components ?? [],
+    whatsIncluded: d.whatsIncluded ?? [],
     pricing: d.pricing ?? [],
     packages: d.packages ?? [],
     isPublished: Boolean(d.isPublished),
@@ -129,6 +134,40 @@ const splitList = (text: string): string[] =>
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+
+/** Drop blank lines/sections/tabs and trim so we never persist empty rows. */
+function cleanWhatsIncluded(tabs: WhatsIncludedTab[]): WhatsIncludedTab[] {
+  return tabs
+    .map((t, ti) => {
+      const sections = t.sections
+        .map((s) => {
+          const items = s.items
+            .map((it) => ({
+              label: (it.label ?? "").trim(),
+              primary: (it.primary ?? "").trim(),
+              pills: (it.pills ?? []).map((p) => p.trim()).filter(Boolean),
+            }))
+            .filter((it) => it.label || it.primary || it.pills.length > 0);
+          const images = (s.images ?? [])
+            .map((img) => ({ src: img.src.trim(), alt: img.alt.trim() }))
+            .filter((img) => img.src);
+          return {
+            icon: s.icon.trim(),
+            title: s.title.trim(),
+            items,
+            images,
+          };
+        })
+        .filter((s) => s.title || s.items.length > 0 || s.images.length > 0);
+      return {
+        id: t.id.trim() || `tab-${ti + 1}`,
+        label: t.label.trim(),
+        flag: t.flag.trim(),
+        sections,
+      };
+    })
+    .filter((t) => t.label || t.sections.length > 0);
+}
 
 function toBody(d: Draft): Record<string, unknown> {
   return {
@@ -164,6 +203,7 @@ function toBody(d: Draft): Record<string, unknown> {
     components: d.components
       .filter((c) => c.label.trim())
       .map((c) => ({ label: c.label.trim(), details: c.details.trim() })),
+    whatsIncluded: cleanWhatsIncluded(d.whatsIncluded),
     pricing: d.pricing
       .filter((p) => p.month.trim() && p.display.trim())
       .map((p) => ({

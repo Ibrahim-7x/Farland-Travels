@@ -37,6 +37,29 @@ const subPackageSchema = z.object({
   priceDisplay: z.string().trim().default(""),
 });
 
+// "What's Included" — tabs → sections → items + images.
+const witImageSchema = z.object({
+  src: z.string().trim().max(500).default(""),
+  alt: z.string().trim().max(255).default(""),
+});
+const witItemSchema = z.object({
+  label: z.string().trim().max(120).default(""),
+  primary: z.string().trim().max(255).default(""),
+  pills: z.array(z.string().trim().min(1)).default([]),
+});
+const witSectionSchema = z.object({
+  icon: z.string().trim().max(16).default(""),
+  title: z.string().trim().max(120).default(""),
+  items: z.array(witItemSchema).default([]),
+  images: z.array(witImageSchema).default([]),
+});
+const witTabSchema = z.object({
+  id: z.string().trim().min(1).max(60),
+  label: z.string().trim().max(80).default(""),
+  flag: z.string().trim().max(16).default(""),
+  sections: z.array(witSectionSchema).default([]),
+});
+
 const destinationInputSchema = z.object({
   id: z.string().trim().min(1).max(50).optional(),
   slug: z.string().trim().min(1).max(100).optional(),
@@ -57,6 +80,7 @@ const destinationInputSchema = z.object({
   metaItems: z.array(metaItemSchema).default([]),
   highlights: z.array(highlightSchema).default([]),
   components: z.array(componentSchema).default([]),
+  whatsIncluded: z.array(witTabSchema).default([]),
   pricing: z.array(pricingSchema).default([]),
   packages: z.array(subPackageSchema).default([]),
   packagesNote: z.string().trim().max(500).nullish(),
@@ -86,6 +110,7 @@ const CONTENT_COLUMNS = [
   "meta_items",
   "highlights",
   "components",
+  "whats_included",
   "pricing",
   "packages",
   "packages_note",
@@ -114,6 +139,7 @@ function contentValues(d: DestinationInput): unknown[] {
     j(d.metaItems),
     j(d.highlights),
     j(d.components),
+    j(d.whatsIncluded),
     j(d.pricing),
     j(d.packages),
     d.packagesNote ?? null,
@@ -296,12 +322,14 @@ destinationsAdminRouter.post(
       `INSERT INTO destinations
          (id, slug, name, subtitle, region, region_label, image, hero_image,
           description, tagline, from_price, badge, rating, rating_text,
-          tags, styles, meta_items, highlights, components, pricing, packages,
-          packages_note, transfers_included, is_published, sort_order)
+          tags, styles, meta_items, highlights, components, whats_included,
+          pricing, packages, packages_note, transfers_included,
+          is_published, sort_order)
        SELECT ?, ?, CONCAT(name, ' (copy)'), subtitle, region, region_label,
           image, hero_image, description, tagline, from_price, badge, rating,
           rating_text, tags, styles, meta_items, highlights, components,
-          pricing, packages, packages_note, transfers_included, 0, ?
+          whats_included, pricing, packages, packages_note, transfers_included,
+          0, ?
        FROM destinations WHERE id = ?`,
       [newId, newSlug, nextSort, req.params.id],
     );

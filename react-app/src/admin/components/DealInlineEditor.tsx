@@ -1,5 +1,6 @@
 import type { Draft } from "../pages/DealFormPage";
 import { Editable, InlineImage } from "./InlineEdit";
+import { WhatsIncludedEditor } from "./WhatsIncludedEditor";
 
 type Props = {
   draft: Draft;
@@ -27,13 +28,6 @@ export function DealInlineEditor({ draft, set }: Props) {
     set("highlights", [...hl, { icon: "", title: "", text: "" }]);
   const rmHl = (i: number) =>
     set("highlights", hl.filter((_, idx) => idx !== i));
-
-  const comp = draft.components;
-  const updComp = (i: number, f: "label" | "details", v: string) =>
-    set("components", comp.map((x, idx) => (idx === i ? { ...x, [f]: v } : x)));
-  const addComp = () => set("components", [...comp, { label: "", details: "" }]);
-  const rmComp = (i: number) =>
-    set("components", comp.filter((_, idx) => idx !== i));
 
   const pricing = draft.pricing;
   const updPrice = (
@@ -216,36 +210,16 @@ export function DealInlineEditor({ draft, set }: Props) {
       {/* ── WHAT'S INCLUDED ── */}
       <section className="iedeal-section">
         <div className="iedeal-eyebrow">What's included</div>
-        {comp.map((c, i) => (
-          <div className="iedeal-comp" key={i}>
-            <Editable
-              className="lbl"
-              value={c.label}
-              onChange={(v) => updComp(i, "label", v)}
-              placeholder="Singapore Hotel"
-              ariaLabel="Component label"
-            />
-            <Editable
-              className="det"
-              multiline
-              value={c.details}
-              onChange={(v) => updComp(i, "details", v)}
-              placeholder="Furama Riverfront — Superior Room · Room Only · 04 Nights"
-              ariaLabel="Component details"
-            />
-            <button
-              type="button"
-              className="ie-remove"
-              onClick={() => rmComp(i)}
-              aria-label="Remove component"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-        <button type="button" className="iedeal-add" onClick={addComp}>
-          + Add included item
-        </button>
+        <p className="admin-muted" style={{ margin: "0 0 14px" }}>
+          This builds the tabbed “What's Included” card on the deal page.
+          Organise it by leg or city (tabs), then add sections (Flights, Hotel,
+          Excursions…), bullet lines, and photos. Each photo appears in that
+          section's slideshow.
+        </p>
+        <WhatsIncludedEditor
+          tabs={draft.whatsIncluded}
+          onChange={(v) => set("whatsIncluded", v)}
+        />
       </section>
 
       {/* ── MONTHLY PRICING ── */}

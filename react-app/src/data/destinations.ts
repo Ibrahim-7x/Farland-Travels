@@ -28,6 +28,28 @@ export type SubPackage = {
   priceDisplay: string;
 };
 
+// ── "What's Included" — admin-editable, rendered as the tabbed card on the
+// deal page. A deal has one or more tabs (legs/cities); each tab has sections
+// (Flights, Hotel, Excursions…); each section has bullet lines and photos.
+export type WhatsIncludedImage = { src: string; alt: string };
+export type WhatsIncludedItem = {
+  label?: string;
+  primary?: string;
+  pills?: string[];
+};
+export type WhatsIncludedSection = {
+  icon: string;
+  title: string;
+  items: WhatsIncludedItem[];
+  images?: WhatsIncludedImage[];
+};
+export type WhatsIncludedTab = {
+  id: string;
+  label: string;
+  flag: string;
+  sections: WhatsIncludedSection[];
+};
+
 export type Destination = {
   id?: string;
   slug: string;
@@ -48,6 +70,7 @@ export type Destination = {
   metaItems: { strong: string; rest: string }[];
   highlights?: { icon: string; title: string; text: string }[];
   components?: PackageComponent[];
+  whatsIncluded?: WhatsIncludedTab[];
   pricing?: MonthlyPrice[];
   packages?: SubPackage[];
   packagesNote?: string;
@@ -426,6 +449,17 @@ function destinationSearchableText(d: Destination): string {
     ...(d.tags ?? []),
     ...(d.styles ?? []),
     ...(d.components ?? []).map((c) => `${c.label} ${c.details}`),
+    ...(d.whatsIncluded ?? []).flatMap((t) => [
+      t.label,
+      ...t.sections.flatMap((s) => [
+        s.title,
+        ...s.items.flatMap((it) => [
+          it.label ?? "",
+          it.primary ?? "",
+          ...(it.pills ?? []),
+        ]),
+      ]),
+    ]),
     ...(d.highlights ?? []).map((h) => `${h.title} ${h.text}`),
   ];
   return parts.join(" • ").toLowerCase();
