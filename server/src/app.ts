@@ -1,8 +1,11 @@
+import path from "node:path";
+import fs from "node:fs";
 import express, { type Express } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import { env } from "./config/env";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { verifyJWT } from "./middleware/auth";
 import { UPLOADS_DIR, UPLOADS_URL_PREFIX, ensureUploadsDir } from "./config/uploads";
@@ -34,7 +37,12 @@ export function createApp(): Express {
   // express-rate-limit reads the real client IP.
   app.set("trust proxy", 1);
 
-  app.use(helmet());
+  // Helmet's default Content-Security-Policy is disabled because this process
+  // also serves the React SPA, which pulls in Google Fonts, Unsplash images and
+  // uses inline styles — a strict default CSP would break them. (The previous
+  // static-only host applied no CSP at all.) All other helmet headers stay on;
+  // a tailored CSP can be added later once the external origins are enumerated.
+  app.use(helmet({ contentSecurityPolicy: false }));
 
   // CORS locked to same origin: requests with no Origin header (same-origin
   // browser requests, the Vite dev proxy, server-to-server) are allowed;
@@ -102,8 +110,34 @@ export function createApp(): Express {
   app.use("/api/admin/content", noStore, verifyJWT, contentAdminRouter);
   app.use("/api/admin/settings", noStore, verifyJWT, settingsAdminRouter);
 
-  // Unmatched API routes → JSON 404; everything → error handler.
+  // Unmatched API routes → JSON 404 (must come before the SPA fallback so a
+  // bad /api path never returns index.html).
   app.use("/api", notFound);
+
+  // ── Frontend (single-origin serving) ──
+  // Serve the built React app and fall back to index.html for client-side
+  // routes, so one Node process serves both the SPA and the API on the same
+  // origin. Skipped in local dev (no build present — Vite serves the frontend).
+  const clientDir = env.CLIENT_DIR
+    ? path.resolve(env.CLIENT_DIR)
+    : path.resolve(__dirname, "..", "public");
+  if (fs.existsSync(path.join(clientDir, "index.html"))) {
+    app.use(
+      express.static(clientDir, {
+        // Vite fingerprints asset filenames, so they can be cached hard; the
+        // HTML entry point must not be cached so new deploys take effect at once.
+        setHeaders: (res, filePath) => {
+          if (filePath.endsWith("index.html")) {
+            res.set("Cache-Control", "no-store");
+          }
+        },
+      }),
+    );
+    app.get("*", (_req, res) => {
+      res.sendFile(path.join(clientDir, "index.html"));
+    });
+  }
+
   app.use(errorHandler);
 
   return app;

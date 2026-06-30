@@ -28,6 +28,13 @@ const EnvSchema = z.object({
   // uploaded media. Defaults to <server>/uploads in dev.
   UPLOADS_DIR: z.preprocess(emptyToUndefined, z.string().optional()),
 
+  // ── Frontend (single-origin serving) ──
+  // Directory holding the built React app (react-app/dist). When set (or when
+  // a default ./public exists next to the compiled server), the Node process
+  // serves the SPA and the /api routes from one origin — the layout used on
+  // Hostinger/cPanel Node hosting. Leave empty in local dev (Vite serves it).
+  CLIENT_DIR: z.preprocess(emptyToUndefined, z.string().optional()),
+
   // ── Email (optional) ──
   SMTP_HOST: z.preprocess(emptyToUndefined, z.string().optional()),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
